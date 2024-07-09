@@ -14,7 +14,14 @@ func ProjectAccessMiddleware(check CheckProjectAccess) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		path := c.Request.URL.Path
 		parts := strings.Split(path, "/")
-		projectID := parts[5]
+
+		if len(parts) < 3 {
+			log.Printf("failed to parse project id for url %s", path)
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		projectID := parts[3]
 
 		if projectID == "" {
 			log.Printf("failed to parse project %s id for url %s", projectID, path)
