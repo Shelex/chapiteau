@@ -3,6 +3,7 @@ package auth
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,8 +12,17 @@ type CheckProjectAccess func(userID string, projectID string) (isAvailable bool,
 
 func ProjectAccessMiddleware(check CheckProjectAccess) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		path := c.Request.URL.Path
+		parts := strings.Split(path, "/")
+		projectID := parts[5]
+
+		if projectID == "" {
+			log.Printf("failed to parse project %s id for url %s", projectID, path)
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
 		userID := c.GetString(UserID)
-		projectID := c.Param("projectId")
 
 		isAvailable, _, err := check(userID, projectID)
 		if err != nil {

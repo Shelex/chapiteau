@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -58,7 +57,6 @@ func AuthMiddleware(secret string, validateApiKey ValidateApiKey, byHeader bool)
 		}
 
 		apiKeyId := claims[ApiKeyID]
-		log.Printf("api key id : %s", apiKeyId)
 
 		if apiKeyId != nil {
 			isValid := validateApiKey(apiKeyId.(string))
