@@ -53,10 +53,6 @@ func (h *RunHandler) processUpload(c *gin.Context, report *models.Report) (*mode
 		},
 	}
 
-	if err := c.ShouldBindJSON(&runInput); err != nil {
-		return nil, err
-	}
-
 	projectID := c.Param("id")
 
 	if err := h.currentUserHasProject(c, projectID, false); err != nil {
@@ -97,12 +93,13 @@ func (h *RunHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	if _, err := h.processUpload(c, report); err != nil {
+	run, err := h.processUpload(c, report)
+	if err != nil {
 		c.String(http.StatusBadRequest, "Failed to process upload: %v", err)
 		return
 	}
 
-	c.String(http.StatusOK, "File uploaded and parsed successfully")
+	c.String(http.StatusOK, "Run %s uploaded and parsed successfully", run.ID)
 }
 
 func (h *RunHandler) UploadReport(c *gin.Context) {
