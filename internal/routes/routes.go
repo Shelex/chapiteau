@@ -20,6 +20,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, cfg config.Config) {
 
 	api.POST("/register", handlers.Auth.Register)
 	api.POST("/login", handlers.Auth.Login)
+	api.GET("/health", healthCheck)
 
 	protected := r.Group("/api")
 	protected.Use(auth.AuthMiddleware(config.JWTSecret, repo.ApiKey.IsValid))
@@ -50,4 +51,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, cfg config.Config) {
 	reports := protected.Group("reports")
 	reports.Use(auth.ProjectAccessMiddleware(repo.Project.AvailableForUser))
 	reports.StaticFS("/", http.Dir("./reports"))
+}
+
+func healthCheck(c *gin.Context) {
+	c.Status(http.StatusOK)
 }
