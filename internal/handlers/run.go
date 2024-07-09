@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"chapiteau/internal/models"
+	reportparser "chapiteau/internal/reportParser"
 	"chapiteau/internal/repository"
 	"errors"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -21,7 +23,7 @@ func NewRunHandler(repo repository.Repository) RunHandler {
 }
 
 func (h *RunHandler) currentUserHasProject(c *gin.Context, projectID string, shouldBeAdmin bool) error {
-	hasProject, isAdmin, err := h.Repo.Project.AvailableFor(getUserIDFromContext(c), projectID)
+	hasProject, isAdmin, err := h.Repo.Project.AvailableForUser(getUserIDFromContext(c), projectID)
 	if err != nil {
 		return err
 	}
@@ -37,20 +39,138 @@ func (h *RunHandler) currentUserHasProject(c *gin.Context, projectID string, sho
 	return nil
 }
 
-func (h *RunHandler) CreateRun(c *gin.Context) {
-	var input models.RunInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+func (h *RunHandler) processUpload(c *gin.Context, report *models.Report) (*models.Run, error) {
+	buildName := c.Query("buildName")
+	buildUrl := c.Query("buildUrl")
+	reportUrl := c.Query("reportUrl")
+
+	runInput := models.RunInput{
+		Report: *report,
+		Build: models.BuildInput{
+			Name:      buildName,
+			Url:       buildUrl,
+			ReportURL: reportUrl,
+		},
+	}
+
+	if err := c.ShouldBindJSON(&runInput); err != nil {
+		return nil, err
 	}
 
 	projectID := c.Param("id")
 
 	if err := h.currentUserHasProject(c, projectID, false); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return nil, err
+	}
+
+	run, err := h.createRun(runInput, projectID, getCreatedByFromContext(c))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error})
+		return nil, err
+	}
+
+	return run, nil
+}
+
+func (h *RunHandler) UploadFile(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error getting file: %v", err)
 		return
 	}
 
+	if !strings.EqualFold(file.Filename, "index.html") {
+		c.String(http.StatusBadRequest, "Uploaded file must be index.html")
+		return
+	}
+
+	f, err := file.Open()
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error opening file: %v", err)
+		return
+	}
+	defer f.Close()
+
+	report, err := reportparser.ParseIndexHTML(f)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Failed to parse index.html: %v", err)
+		return
+	}
+
+	if _, err := h.processUpload(c, report); err != nil {
+		c.String(http.StatusBadRequest, "Failed to process upload: %v", err)
+		return
+	}
+
+	c.String(http.StatusOK, "File uploaded and parsed successfully")
+}
+
+func (h *RunHandler) UploadReport(c *gin.Context) {
+	form, err := c.MultipartForm()
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error parsing form: %v", err)
+		return
+	}
+
+	files := form.File["files"]
+	if len(files) == 0 {
+		c.String(http.StatusBadRequest, "No files uploaded")
+		return
+	}
+
+	hasIndexHtml := false
+	var run *models.Run
+
+	for _, file := range files {
+		if file.Filename != "index.html" {
+			continue
+		}
+		hasIndexHtml = true
+		f, err := file.Open()
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error opening index.html: %v", err)
+			return
+		}
+		defer f.Close()
+		report, err := reportparser.ParseIndexHTML(f)
+		if err != nil {
+			c.String(http.StatusBadRequest, "Failed to parse index.html: %v", err)
+			return
+		}
+
+		created, err := h.processUpload(c, report)
+		if err != nil {
+			c.String(http.StatusBadRequest, "Failed to process upload: %v", err)
+			return
+		}
+
+		run = created
+		break
+	}
+
+	if !hasIndexHtml {
+		c.String(http.StatusBadRequest, "Folder must contain index.html")
+		return
+	}
+
+	if run == nil {
+		c.String(http.StatusInternalServerError, "Failed to record run")
+		return
+	}
+
+	uploadPath := fmt.Sprintf("reports/%s/%s", run.ProjectID, run.ID)
+	for _, file := range files {
+		dst := filepath.Join(uploadPath, file.Filename)
+		if err := c.SaveUploadedFile(file, dst); err != nil {
+			c.String(http.StatusInternalServerError, "Error saving file: %v", err)
+			return
+		}
+	}
+
+	c.String(http.StatusOK, "Folder uploaded successfully")
+}
+
+func (h *RunHandler) createRun(input models.RunInput, projectID string, author string) (*models.Run, error) {
 	duration := time.Duration(input.Report.Duration * float64(time.Millisecond))
 	startedAt := time.UnixMilli(input.Report.StartTime)
 	finishedAt := startedAt.Add(duration)
@@ -72,7 +192,7 @@ func (h *RunHandler) CreateRun(c *gin.Context) {
 		FinishedAt: finishedAt,
 		Duration:   int64(duration),
 		CreatedAt:  time.Now(),
-		CreatedBy:  getCreatedByFromContext(c),
+		CreatedBy:  author,
 		Total:      int64(input.Report.Stats.Total),
 		Expected:   int64(input.Report.Stats.Expected),
 		Unexpected: int64(input.Report.Stats.Unexpected),
@@ -88,8 +208,7 @@ func (h *RunHandler) CreateRun(c *gin.Context) {
 
 	if err := h.Repo.Run.CreateRun(&run, trx); err != nil {
 		trx.Rollback()
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create run record"})
-		return
+		return nil, fmt.Errorf("failed to create run record: %w", err)
 	}
 
 	for _, file := range input.Report.Files {
@@ -109,8 +228,7 @@ func (h *RunHandler) CreateRun(c *gin.Context) {
 
 		if err := h.Repo.File.CreateFile(&f, trx); err != nil {
 			trx.Rollback()
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create file record"})
-			break
+			return nil, fmt.Errorf("failed to create file record: %w", err)
 		}
 
 		complete.Files = append(complete.Files, f)
@@ -132,8 +250,7 @@ func (h *RunHandler) CreateRun(c *gin.Context) {
 
 			if err := h.Repo.Test.CreateTest(&t, trx); err != nil {
 				trx.Rollback()
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create file record"})
-				break
+				return nil, fmt.Errorf("failed to create test record: %w", err)
 			}
 
 			complete.Tests = append(complete.Tests, t)
@@ -152,21 +269,16 @@ func (h *RunHandler) CreateRun(c *gin.Context) {
 
 					if err := h.Repo.Test.CreateTestAttachment(&a, trx); err != nil {
 						trx.Rollback()
-						c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create file record"})
-						break
+						return nil, fmt.Errorf("failed to create attachment record: %w", err)
 					}
-
 					complete.Attachments = append(complete.Attachments, a)
 				}
 			}
 		}
 	}
 
-	if len(c.Errors) == 0 {
-		trx.Commit()
-	}
-
-	c.JSON(http.StatusCreated, complete)
+	trx.Commit()
+	return &run, nil
 }
 
 func (h *RunHandler) GetRuns(c *gin.Context) {

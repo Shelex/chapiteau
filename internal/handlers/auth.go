@@ -22,6 +22,11 @@ func NewAuthHandler(repo repository.Repository, config config.Config) AuthHandle
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
+	if h.Config.DisabledRegistration {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Registration is disabled"})
+		return
+	}
+
 	var input struct {
 		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required"`

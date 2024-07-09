@@ -57,7 +57,7 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 }
 
 func (h *ProjectHandler) currentUserIsAdmin(c *gin.Context, projectID string) error {
-	hasProject, isAdmin, err := h.Repo.Project.AvailableFor(getUserIDFromContext(c), projectID)
+	hasProject, isAdmin, err := h.Repo.Project.AvailableForUser(getUserIDFromContext(c), projectID)
 	if err != nil {
 		return err
 	}

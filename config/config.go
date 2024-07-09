@@ -3,10 +3,11 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	DatabaseURL string `mapstructure:"DATABASE_URL"`
-	JWTSecret   string `mapstructure:"JWT_SECRET"`
-	AppHost     string `mapstructure:"API_HOST"`
-	AppPort     string `mapstructure:"API_PORT"`
+	DatabaseURL          string `mapstructure:"DATABASE_URL"`
+	JWTSecret            string `mapstructure:"JWT_SECRET"`
+	AppHost              string `mapstructure:"API_HOST"`
+	AppPort              string `mapstructure:"API_PORT"`
+	DisabledRegistration bool   `mapstructure:"DISABLED_REGISTRATION"`
 }
 
 func LoadConfig() (Config, error) {

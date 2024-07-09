@@ -5,6 +5,7 @@ import (
 	"chapiteau/internal/auth"
 	"chapiteau/internal/handlers"
 	"chapiteau/internal/repository"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -33,7 +34,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, cfg config.Config) {
 	project.POST("/:id/owner", handlers.Project.SetProjectOwner)
 	project.DELETE("/:id/owner/:userId", handlers.Project.RemoveProjectOwner)
 
-	project.POST("/:id/run", handlers.Run.CreateRun)
+	project.POST("/:id/file", handlers.Run.UploadFile)
+	project.POST("/:id/report", handlers.Run.UploadReport)
 	project.GET("/:id/runs", handlers.Run.GetRuns)
 	project.PATCH("/:id/run/:runId", handlers.Run.UpdateRun)
 	project.DELETE("/run/:runId", handlers.Run.DeleteRun)
@@ -44,4 +46,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, cfg config.Config) {
 	apiKey.POST("/", handlers.ApiKey.CreateToken)
 	apiKey.GET("/", handlers.ApiKey.GetTokens)
 	apiKey.DELETE("/:id", handlers.ApiKey.DeleteToken)
+
+	reports := protected.Group("reports")
+	reports.Use(auth.ProjectAccessMiddleware(repo.Project.AvailableForUser))
+	reports.StaticFS("/", http.Dir("./reports"))
 }

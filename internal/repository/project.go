@@ -76,7 +76,7 @@ func (r *ProjectRepository) GetUserProjects(userID string) ([]models.UserProject
 	return relations, err
 }
 
-func (r *ProjectRepository) AvailableFor(userID, projectID string) (isAvailable bool, isOwner bool, err error) {
+func (r *ProjectRepository) AvailableForUser(userID, projectID string) (isAvailable bool, isOwner bool, err error) {
 	relation, err := r.GetUserProject(userID, projectID)
 	if err != nil {
 		return false, false, err
