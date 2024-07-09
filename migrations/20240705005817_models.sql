@@ -1,8 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
 
-CREATE DATABASE chapiteau;
-
 CREATE TABLE users (
     id uuid NOT NULL,
     username VARCHAR(255) NOT NULL UNIQUE,
@@ -119,5 +117,4 @@ DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS api_keys;
 DROP TABLE IF EXISTS users;
 
-DROP DATABASE IF EXISTS chapiteau;
 -- +goose StatementEnd
