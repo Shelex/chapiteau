@@ -2,6 +2,8 @@ FROM golang:1.21.7-alpine AS builder
 
 WORKDIR /app
 
+RUN apk add --no-cache make
+
 COPY --chown=app:app . .
 
 RUN make build
