@@ -8,6 +8,7 @@ type Config struct {
 	AppHost              string `mapstructure:"API_HOST"`
 	AppPort              string `mapstructure:"API_PORT"`
 	DisabledRegistration bool   `mapstructure:"DISABLED_REGISTRATION"`
+	FQDN                 string `mapstructure:"FQDN"`
 }
 
 func LoadConfig() (Config, error) {

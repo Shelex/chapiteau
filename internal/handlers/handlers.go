@@ -19,7 +19,7 @@ func NewHandlers(repo repository.Repository, config config.Config) Handlers {
 		Auth:    NewAuthHandler(repo, config),
 		ApiKey:  NewApiKeyHandler(repo, config),
 		Project: NewProjectHandler(repo),
-		Run:     NewRunHandler(repo),
+		Run:     NewRunHandler(repo, config),
 	}
 }
 

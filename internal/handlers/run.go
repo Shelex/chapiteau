@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"chapiteau/config"
 	"chapiteau/internal/models"
 	reportparser "chapiteau/internal/reportParser"
 	"chapiteau/internal/repository"
@@ -15,11 +16,12 @@ import (
 )
 
 type RunHandler struct {
-	Repo repository.Repository
+	Repo   repository.Repository
+	Config config.Config
 }
 
-func NewRunHandler(repo repository.Repository) RunHandler {
-	return RunHandler{Repo: repo}
+func NewRunHandler(repo repository.Repository, cfg config.Config) RunHandler {
+	return RunHandler{Repo: repo, Config: cfg}
 }
 
 func (h *RunHandler) currentUserHasProject(c *gin.Context, projectID string, shouldBeAdmin bool) error {
@@ -39,7 +41,7 @@ func (h *RunHandler) currentUserHasProject(c *gin.Context, projectID string, sho
 	return nil
 }
 
-func (h *RunHandler) processUpload(c *gin.Context, report *models.Report) (*models.Run, error) {
+func (h *RunHandler) processUpload(c *gin.Context, report *models.Report, withReport bool) (*models.Run, error) {
 	buildName := c.Query("buildName")
 	buildUrl := c.Query("buildUrl")
 	reportUrl := c.Query("reportUrl")
@@ -59,7 +61,7 @@ func (h *RunHandler) processUpload(c *gin.Context, report *models.Report) (*mode
 		return nil, err
 	}
 
-	run, err := h.createRun(runInput, projectID, getCreatedByFromContext(c))
+	run, err := h.createRun(runInput, projectID, getCreatedByFromContext(c), withReport)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error})
 		return nil, err
@@ -93,7 +95,7 @@ func (h *RunHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	run, err := h.processUpload(c, report)
+	run, err := h.processUpload(c, report, false)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Failed to process upload: %v", err)
 		return
@@ -135,7 +137,7 @@ func (h *RunHandler) UploadReport(c *gin.Context) {
 			return
 		}
 
-		created, err := h.processUpload(c, report)
+		created, err := h.processUpload(c, report, true)
 		if err != nil {
 			c.String(http.StatusBadRequest, "Failed to process upload: %v", err)
 			return
@@ -167,7 +169,7 @@ func (h *RunHandler) UploadReport(c *gin.Context) {
 	c.String(http.StatusOK, "Folder uploaded successfully")
 }
 
-func (h *RunHandler) createRun(input models.RunInput, projectID string, author string) (*models.Run, error) {
+func (h *RunHandler) createRun(input models.RunInput, projectID string, author string, withLocalReport bool) (*models.Run, error) {
 	duration := time.Duration(input.Report.Duration * float64(time.Millisecond))
 	startedAt := time.UnixMilli(input.Report.StartTime)
 	finishedAt := startedAt.Add(duration)
@@ -199,6 +201,10 @@ func (h *RunHandler) createRun(input models.RunInput, projectID string, author s
 		ReportURL:  input.Build.ReportURL,
 		BuildName:  input.Build.Name,
 		BuildURL:   input.Build.Url,
+	}
+
+	if withLocalReport {
+		run.ReportURL = fmt.Sprintf("%s/api/reports/%s/%s", h.Config.FQDN, run.ProjectID, run.ID)
 	}
 
 	complete.Run = run
