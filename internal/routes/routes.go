@@ -23,7 +23,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, cfg config.Config) {
 	api.GET("/health", healthCheck)
 
 	protected := r.Group("/api")
-	protected.Use(auth.AuthMiddleware(config.JWTSecret, repo.ApiKey.IsValid))
+	protected.Use(auth.AuthMiddleware(config.JWTSecret, repo.ApiKey.IsValid, true))
 
 	project := protected.Group("project")
 	project.POST("/", handlers.Project.CreateProject)
@@ -48,8 +48,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, cfg config.Config) {
 	apiKey.GET("/", handlers.ApiKey.GetTokens)
 	apiKey.DELETE("/:id", handlers.ApiKey.DeleteToken)
 
-	reports := protected.Group("reports")
-	reports.Use(auth.ProjectAccessMiddleware(repo.Project.AvailableForUser))
+	reports := api.Group("reports")
+	reports.Use(auth.AuthMiddleware(config.JWTSecret, repo.ApiKey.IsValid, false), auth.ProjectAccessMiddleware(repo.Project.AvailableForUser))
 	reports.StaticFS("/", http.Dir("./reports"))
 }
 

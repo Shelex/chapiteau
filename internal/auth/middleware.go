@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -17,9 +18,14 @@ const ExpireAt string = "exp"
 const ApiKeyID string = "api_key_id"
 const ApiKeyName string = "api_key_name"
 
-func AuthMiddleware(secret string, validateApiKey ValidateApiKey) gin.HandlerFunc {
+func AuthMiddleware(secret string, validateApiKey ValidateApiKey, byHeader bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
+		// use token query param, f.e. for file server redirects
+		if !byHeader {
+			authHeader = fmt.Sprintf("Bearer %s", c.Query("token"))
+		}
+
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing authorization header"})
 			c.Abort()
