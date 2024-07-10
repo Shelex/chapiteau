@@ -43,14 +43,22 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		IsAdmin:   true,
 	}
 
-	if err := h.Repo.Project.CreateProject(project); err != nil {
+	trx := h.Repo.DB.Begin()
+
+	if err := h.Repo.Project.CreateProject(project, trx); err != nil {
+		trx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create project"})
 		return
 	}
 
-	if err := h.Repo.Project.CreateUserProject(relation); err != nil {
+	if err := h.Repo.Project.CreateUserProject(relation, trx); err != nil {
+		trx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to link project to user"})
 		return
+	}
+
+	if len(c.Errors) == 0 {
+		trx.Commit()
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"project": project})
@@ -237,7 +245,7 @@ func (h *ProjectHandler) InviteUser(c *gin.Context) {
 		IsAdmin:   input.IsAdmin,
 	}
 
-	if err := h.Repo.Project.CreateUserProject(relation); err != nil {
+	if err := h.Repo.Project.CreateUserProject(relation, nil); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to invite user"})
 		return
 	}

@@ -16,8 +16,12 @@ func NewProjectRepository(db *gorm.DB) ProjectRepository {
 	}
 }
 
-func (r *ProjectRepository) CreateProject(project *models.Project) error {
-	return r.db.Create(project).Error
+func (r *ProjectRepository) CreateProject(project *models.Project, trx *gorm.DB) error {
+	client := r.db
+	if trx != nil {
+		client = trx
+	}
+	return client.Create(project).Error
 }
 
 func (r *ProjectRepository) UpdateProject(project *models.Project) error {
@@ -50,8 +54,12 @@ func (r *ProjectRepository) GetProjectsByIDs(ids []string) ([]models.Project, er
 	return projects, nil
 }
 
-func (r *ProjectRepository) CreateUserProject(userProject *models.UserProject) error {
-	return r.db.Create(userProject).Error
+func (r *ProjectRepository) CreateUserProject(userProject *models.UserProject, trx *gorm.DB) error {
+	client := r.db
+	if trx != nil {
+		client = trx
+	}
+	return client.Create(userProject).Error
 }
 
 func (r *ProjectRepository) GetProjectUsers(projectID string) ([]models.UserProject, error) {
