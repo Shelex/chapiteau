@@ -84,6 +84,7 @@ CREATE TABLE tests (
 CREATE TABLE test_attachments (
     id uuid NOT NULL,
     run_id uuid NOT NULL,
+    project_id uuid NOT NULL,
     test_id uuid NOT NULL,
     attempt bigint DEFAULT 0 NOT NULL,
     name varchar(100),
@@ -101,6 +102,7 @@ ALTER TABLE files ADD CONSTRAINT fk_files_run FOREIGN KEY (run_id) REFERENCES ru
 ALTER TABLE tests ADD CONSTRAINT fk_test_project FOREIGN KEY (project_id) REFERENCES projects (id);
 ALTER TABLE tests ADD CONSTRAINT fk_test_run FOREIGN KEY (run_id) REFERENCES runs (id);
 ALTER TABLE tests ADD CONSTRAINT fk_test_file FOREIGN KEY (file_id) REFERENCES files (id);
+ALTER TABLE test_attachments ADD CONSTRAINT fk_testAttachment_project FOREIGN KEY (project_id) REFERENCES projects (id);
 ALTER TABLE test_attachments ADD CONSTRAINT fk_testAttachment_run FOREIGN KEY (run_id) REFERENCES runs (id);
 ALTER TABLE test_attachments ADD CONSTRAINT fk_testAttachment_test FOREIGN KEY (test_id) REFERENCES tests (id);
 

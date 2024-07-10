@@ -57,3 +57,11 @@ func (r *RunRepository) FindTestRuns(testID string) ([]models.Test, error) {
 	err := r.db.Find(&tests, "test_id = ?", testID).Error
 	return tests, err
 }
+
+func (r *RunRepository) DeleteRunsByProject(ID string, trx *gorm.DB) error {
+	client := r.db
+	if trx != nil {
+		client = trx
+	}
+	return client.Delete(&models.Run{}, "project_id = ?", ID).Error
+}

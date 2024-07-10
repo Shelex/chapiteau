@@ -40,6 +40,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, cfg config.Config) {
 	project.GET("/:id/runs", handlers.Run.GetRuns)
 	project.PATCH("/:id/run/:runId", handlers.Run.UpdateRun)
 	project.DELETE("/run/:runId", handlers.Run.DeleteRun)
+	project.DELETE("/run/:runId/report", handlers.Run.DeleteRunReport)
 	project.GET("/:id/runs/file/:fileId", handlers.Run.GetFileRuns)
 	project.GET("/:id/runs/test/:testId", handlers.Run.GetTestRuns)
 

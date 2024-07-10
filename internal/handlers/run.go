@@ -157,7 +157,7 @@ func (h *RunHandler) UploadReport(c *gin.Context) {
 		return
 	}
 
-	uploadPath := fmt.Sprintf("reports/%s/%s", run.ProjectID, run.ID)
+	uploadPath := h.Repo.Reports.GetPath(h.Repo.Reports.Root, run.ProjectID, run.ID)
 	for _, file := range files {
 		dst := filepath.Join(uploadPath, file.Filename)
 		if err := c.SaveUploadedFile(file, dst); err != nil {
@@ -265,6 +265,7 @@ func (h *RunHandler) createRun(input models.RunInput, projectID string, author s
 						ID:          generateUUID(),
 						TestID:      t.ID,
 						RunID:       f.RunID,
+						ProjectID:   f.ProjectID,
 						Name:        attachment.Name,
 						ContentType: attachment.ContentType,
 						Path:        attachment.Path,
@@ -365,21 +366,27 @@ func (h *RunHandler) DeleteRun(c *gin.Context) {
 		return
 	}
 
-	if err := h.Repo.Test.DeleteTests(runID, trx); err != nil {
+	if err := h.Repo.File.DeleteFiles(runID, trx); err != nil {
 		trx.Rollback()
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete run"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete run files"})
 		return
 	}
 
-	if err := h.Repo.File.DeleteFiles(runID, trx); err != nil {
+	if err := h.Repo.Test.DeleteTests(runID, trx); err != nil {
 		trx.Rollback()
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete run"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete run tests"})
 		return
 	}
 
 	if err := h.Repo.Run.DeleteRun(runID, trx); err != nil {
 		trx.Rollback()
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete run"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete run attachments"})
+		return
+	}
+
+	if err := h.Repo.Reports.DeleteRunReport(run.ProjectID, runID); err != nil {
+		trx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete run reports"})
 		return
 	}
 
@@ -388,6 +395,29 @@ func (h *RunHandler) DeleteRun(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Run deleted successfully"})
+}
+
+func (h *RunHandler) DeleteRunReport(c *gin.Context) {
+	runID := c.Param("runId")
+
+	run, err := h.Repo.Run.GetRun(runID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Run not found"})
+		return
+	}
+
+	if err := h.currentUserHasProject(c, run.ProjectID, true); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.Repo.Reports.DeleteRunReport(run.ProjectID, runID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete run reports"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Run report deleted successfully"})
+
 }
 
 func (h *RunHandler) GetFileRuns(c *gin.Context) {

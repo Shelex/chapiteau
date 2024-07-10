@@ -79,6 +79,7 @@ type Test struct {
 
 type TestAttachment struct {
 	ID          string `gorm:"type:uuid;primaryKey" json:"id"`
+	ProjectID   string `gorm:"type:uuid;not null" json:"projectId"`
 	RunID       string `gorm:"type:uuid;not null" json:"runId"`
 	TestID      string `gorm:"type:uuid;not null" json:"testId"`
 	Attempt     int64  `gorm:"default:0;not null" json:"attempt"`

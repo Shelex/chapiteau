@@ -36,3 +36,11 @@ func (r *FileRepository) DeleteFiles(runID string, trx *gorm.DB) error {
 	}
 	return client.Delete(&models.File{}, "run_id = ?", runID).Error
 }
+
+func (r *FileRepository) DeleteFilesByProject(ID string, trx *gorm.DB) error {
+	client := r.db
+	if trx != nil {
+		client = trx
+	}
+	return client.Delete(&models.File{}, "project_id = ?", ID).Error
+}

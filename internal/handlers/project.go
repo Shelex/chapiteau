@@ -156,17 +156,52 @@ func (h *ProjectHandler) DeleteProject(c *gin.Context) {
 		return
 	}
 
-	//TODO
-	//trx := h.Repo.DB.Begin()
+	trx := h.Repo.DB.Begin()
 
-	if err := h.Repo.Project.DeleteUserProject(getUserIDFromContext(c), projectID); err != nil {
+	if err := h.Repo.Test.DeleteTestAttachmentsByProject(projectID, trx); err != nil {
+		trx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete test attachments"})
+		return
+	}
+
+	if err := h.Repo.Test.DeleteTestsByProject(projectID, trx); err != nil {
+		trx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete tests"})
+		return
+	}
+
+	if err := h.Repo.File.DeleteFilesByProject(projectID, trx); err != nil {
+		trx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete files"})
+		return
+	}
+
+	if err := h.Repo.Run.DeleteRunsByProject(projectID, trx); err != nil {
+		trx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete runs"})
+		return
+	}
+
+	if err := h.Repo.Project.DeleteProject(projectID, trx); err != nil {
+		trx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete project"})
+		return
+	}
+
+	if err := h.Repo.Project.DeleteUserProject(getUserIDFromContext(c), projectID, trx); err != nil {
+		trx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete user project relation"})
 		return
 	}
 
-	if err := h.Repo.Project.DeleteProject(projectID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete project"})
+	if err := h.Repo.Reports.DeleteProjectReports(projectID); err != nil {
+		trx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete reports"})
 		return
+	}
+
+	if len(c.Errors) == 0 {
+		trx.Commit()
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Project deleted successfully"})

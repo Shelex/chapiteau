@@ -24,8 +24,12 @@ func (r *ProjectRepository) UpdateProject(project *models.Project) error {
 	return r.db.Save(project).Error
 }
 
-func (r *ProjectRepository) DeleteProject(id string) error {
-	return r.db.Delete(&models.Project{}, "id = ?", id).Error
+func (r *ProjectRepository) DeleteProject(id string, trx *gorm.DB) error {
+	client := r.db
+	if trx != nil {
+		client = trx
+	}
+	return client.Delete(&models.Project{}, "id = ?", id).Error
 }
 
 func (r *ProjectRepository) GetProject(projectId string) (models.Project, error) {
@@ -56,8 +60,12 @@ func (r *ProjectRepository) GetProjectUsers(projectID string) ([]models.UserProj
 	return userProjects, err
 }
 
-func (r *ProjectRepository) DeleteUserProject(userID, projectID string) error {
-	return r.db.Where("user_id = ? AND project_id = ?", userID, projectID).Delete(&models.UserProject{}).Error
+func (r *ProjectRepository) DeleteUserProject(userID, projectID string, trx *gorm.DB) error {
+	client := r.db
+	if trx != nil {
+		client = trx
+	}
+	return client.Where("user_id = ? AND project_id = ?", userID, projectID).Delete(&models.UserProject{}).Error
 }
 
 func (r *ProjectRepository) UpdateUserProject(userProject *models.UserProject) error {

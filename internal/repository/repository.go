@@ -10,6 +10,7 @@ type Repository struct {
 	File    FileRepository
 	Test    TestRepository
 	DB      *gorm.DB
+	Reports ReportsStorage
 }
 
 func NewRepository(db *gorm.DB) Repository {
@@ -20,6 +21,7 @@ func NewRepository(db *gorm.DB) Repository {
 		Run:     NewRunRepository(db),
 		File:    NewFileRepository(db),
 		Test:    NewTestRepository(db),
+		Reports: NewReportsStorage(),
 		DB:      db,
 	}
 }

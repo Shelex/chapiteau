@@ -37,6 +37,14 @@ func (r *TestRepository) DeleteTests(runID string, trx *gorm.DB) error {
 	return client.Delete(&models.Test{}, "run_id = ?", runID).Error
 }
 
+func (r *TestRepository) DeleteTestsByProject(ID string, trx *gorm.DB) error {
+	client := r.db
+	if trx != nil {
+		client = trx
+	}
+	return client.Delete(&models.Test{}, "project_id = ?", ID).Error
+}
+
 func (r *TestRepository) CreateTestAttachment(attachment *models.TestAttachment, trx *gorm.DB) error {
 	if trx != nil {
 		return trx.Create(attachment).Error
@@ -56,4 +64,12 @@ func (r *TestRepository) DeleteTestAttachments(runID string, trx *gorm.DB) error
 		client = trx
 	}
 	return client.Delete(&models.TestAttachment{}, "run_id = ?", runID).Error
+}
+
+func (r *TestRepository) DeleteTestAttachmentsByProject(ID string, trx *gorm.DB) error {
+	client := r.db
+	if trx != nil {
+		client = trx
+	}
+	return client.Delete(&models.TestAttachment{}, "project_id = ?", ID).Error
 }
