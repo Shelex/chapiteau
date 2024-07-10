@@ -6,7 +6,11 @@ Welcome to the chapiteau - a place where you will observe your playwright test r
 
 ## Getting Started
 
-Nah, no way for now
+- Register account
+- Create api key
+- Create project
+- use `chapiteau-cli` to upload test report or just index.html
+- let the clowns and acrobats do the damn job
 
 ## Features
 
