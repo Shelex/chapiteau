@@ -18,8 +18,10 @@ type UserProject struct {
 }
 
 type Project struct {
-	ID   string `gorm:"type:uuid;primaryKey"`
-	Name string `gorm:"not null"`
+	ID        string    `gorm:"type:uuid;primaryKey"`
+	Name      string    `gorm:"not null"`
+	CreatedAt time.Time `gorm:"not null" json:"createdAt"`
+	IsAdmin   bool      `gorm:"->" json:"isAdmin"`
 }
 
 type ApiKey struct {

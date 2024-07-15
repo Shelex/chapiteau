@@ -42,18 +42,6 @@ func (r *ProjectRepository) GetProject(projectId string) (models.Project, error)
 	return project, err
 }
 
-func (r *ProjectRepository) GetProjectsByIDs(ids []string) ([]models.Project, error) {
-	projects := make([]models.Project, len(ids))
-	for i, id := range ids {
-		p, err := r.GetProject(id)
-		if err != nil {
-			return nil, err
-		}
-		projects[i] = p
-	}
-	return projects, nil
-}
-
 func (r *ProjectRepository) CreateUserProject(userProject *models.UserProject, trx *gorm.DB) error {
 	client := r.db
 	if trx != nil {
@@ -86,10 +74,15 @@ func (r *ProjectRepository) GetUserProject(userID, projectID string) (models.Use
 	return relation, err
 }
 
-func (r *ProjectRepository) GetUserProjects(userID string) ([]models.UserProject, error) {
-	var relations []models.UserProject
-	err := r.db.Find(&relations, "user_id = ?", userID).Error
-	return relations, err
+func (r *ProjectRepository) GetUserProjects(userID string) ([]models.Project, error) {
+	var projects []models.Project
+	err := r.db.Table("projects").
+		Select("projects.id, projects.name, projects.created_at, user_projects.is_admin").
+		Joins("INNER JOIN user_projects ON projects.id = user_projects.project_id").
+		Where("user_projects.user_id = ?", userID).
+		Find(&projects).Error
+
+	return projects, err
 }
 
 func (r *ProjectRepository) AvailableForUser(userID, projectID string) (isAvailable bool, isOwner bool, err error) {

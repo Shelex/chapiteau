@@ -16,6 +16,9 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, cfg config.Config) {
 	repo := repository.NewRepository(db)
 	handlers := handlers.NewHandlers(repo, config)
 
+	// if true - will check token from header, otherwise - from query param
+	checkAuthInHeader := true
+
 	api := r.Group("/api")
 
 	api.POST("/register", handlers.Auth.Register)
@@ -23,7 +26,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, cfg config.Config) {
 	api.GET("/health", healthCheck)
 
 	protected := r.Group("/api")
-	protected.Use(auth.AuthMiddleware(config.JWTSecret, repo.ApiKey.IsValid, true))
+	protected.Use(auth.AuthMiddleware(config.JWTSecret, repo.ApiKey.IsValid, checkAuthInHeader))
 
 	project := protected.Group("project")
 	project.POST("/", handlers.Project.CreateProject)
@@ -50,7 +53,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, cfg config.Config) {
 	apiKey.DELETE("/:id", handlers.ApiKey.DeleteToken)
 
 	reports := api.Group("reports")
-	reports.Use(auth.AuthMiddleware(config.JWTSecret, repo.ApiKey.IsValid, false), auth.ProjectAccessMiddleware(repo.Project.AvailableForUser))
+	reports.Use(auth.AuthMiddleware(config.JWTSecret, repo.ApiKey.IsValid, !checkAuthInHeader), auth.ProjectAccessMiddleware(repo.Project.AvailableForUser))
 	reports.StaticFS("/", http.Dir("./reports"))
 }
 

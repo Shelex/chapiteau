@@ -19,6 +19,7 @@ CREATE TABLE api_keys (
 CREATE TABLE projects (
     id uuid NOT NULL,
     name varchar(100) NOT NULL,
+    created_at timestamp NOT NULL,
     CONSTRAINT pk_projects PRIMARY KEY (id)
 );
 

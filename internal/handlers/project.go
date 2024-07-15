@@ -4,6 +4,7 @@ import (
 	"chapiteau/internal/models"
 	"chapiteau/internal/repository"
 	"net/http"
+	"time"
 
 	"errors"
 
@@ -32,8 +33,9 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 	userID := getUserIDFromContext(c)
 
 	project := &models.Project{
-		ID:   generateUUID(),
-		Name: input.Name,
+		ID:        generateUUID(),
+		Name:      input.Name,
+		CreatedAt: time.Now(),
 	}
 
 	relation := &models.UserProject{
@@ -109,18 +111,7 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 func (h *ProjectHandler) GetProjects(c *gin.Context) {
 	userID := getUserIDFromContext(c)
 
-	relations, err := h.Repo.Project.GetUserProjects(userID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to fetch projects"})
-		return
-	}
-
-	projectIds := make([]string, len(relations))
-	for index, relation := range relations {
-		projectIds[index] = relation.ProjectID
-	}
-
-	projects, err := h.Repo.Project.GetProjectsByIDs(projectIds)
+	projects, err := h.Repo.Project.GetUserProjects(userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to fetch projects"})
 		return
@@ -190,15 +181,15 @@ func (h *ProjectHandler) DeleteProject(c *gin.Context) {
 		return
 	}
 
-	if err := h.Repo.Project.DeleteProject(projectID, trx); err != nil {
-		trx.Rollback()
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete project"})
-		return
-	}
-
 	if err := h.Repo.Project.DeleteUserProject(getUserIDFromContext(c), projectID, trx); err != nil {
 		trx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete user project relation"})
+		return
+	}
+
+	if err := h.Repo.Project.DeleteProject(projectID, trx); err != nil {
+		trx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete project"})
 		return
 	}
 
