@@ -28,7 +28,7 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
             {project && <Project project={project} />}
             <div className="mt-10">
                 <h2 className="text-xl font-bold">Runs</h2>
-                <RunsChart runs={runs} />
+                {runs?.length > 1 && <RunsChart runs={runs} />}
                 <ul>
                     {runs.map((run) => (
                         <li key={run.id}>
