@@ -3,12 +3,6 @@ import { parseHtmlReport, type BuildInfo } from "~/lib/parser";
 import { verifyApiKey } from "../middleware";
 import { saveReport } from "~/server/queries/report";
 
-export const config = {
-    api: {
-        bodyParser: false,
-    },
-};
-
 export async function POST(
     req: NextRequest,
     {
