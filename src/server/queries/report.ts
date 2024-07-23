@@ -39,7 +39,7 @@ export const saveReport = async (input: SaveReportInput) => {
                 buildName: report.buildName ?? "",
                 buildUrl: report.buildUrl ?? "",
                 total: report.stats.total,
-                expected: report.stats.total,
+                expected: report.stats.expected,
                 unexpected: report.stats.unexpected,
                 flaky: report.stats.flaky,
                 skipped: report.stats.skipped,
