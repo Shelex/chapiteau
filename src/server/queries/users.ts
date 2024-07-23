@@ -1,4 +1,4 @@
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, and, inArray } from "drizzle-orm";
 import { db } from "~/server/db";
 import { users, type User } from "~/server/db/users";
 import {
@@ -55,4 +55,16 @@ export const getProjectDashboard = async (projectId: Project["id"]) => {
         project: project,
         runs: projectRuns,
     };
+};
+
+export const userIsTeamMember = async (userId: User["id"], teamId: Team["id"]) => {
+    const [member] = await db
+        .select()
+        .from(teamMembers)
+        .where(
+            and(eq(teamMembers.userId, userId), eq(teamMembers.teamId, teamId))
+        )
+        .limit(1);
+
+    return !!member;
 };

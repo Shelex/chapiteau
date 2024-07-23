@@ -7,8 +7,7 @@ const Project = dynamic(() => import("~/components/Project"), {
 });
 import { getProjectDashboard } from "~/server/queries";
 import { RunsChart } from "~/components/Chart";
-import Link from "next/link";
-import { Button } from "~/components/ui/button";
+import RunView from "~/components/Run";
 
 interface ProjectProps {
     params: { id: string };
@@ -26,23 +25,18 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
     return (
         <main className="text-center mt-10">
             {project && <Project project={project} />}
-            <div className="mt-10">
-                <h2 className="text-xl font-bold">Runs</h2>
-                {runs?.length > 1 && <RunsChart runs={runs} />}
-                <ul>
-                    {runs.map((run) => (
-                        <li key={run.id}>
-                            <h4 className="text-xl font-bold">{run.id}</h4>
-                            {run.reportUrl && (
-                                <Link href={run.reportUrl}>
-                                    <Button>Open Report</Button>
-                                </Link>
-                            )}
-                            <pre>{JSON.stringify(run, null, 2)}</pre>
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            {project?.teamId && (
+                <div className="mt-10">
+                    {runs?.length > 1 && <RunsChart runs={runs} />}
+                    <ul>
+                        {runs.map((run) => (
+                            <li key={run.id}>
+                                <RunView teamId={project?.teamId} run={run} />
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </main>
     );
 }

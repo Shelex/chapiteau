@@ -1,13 +1,10 @@
 "use client";
-
-import { TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "~/components/ui/card";
@@ -54,10 +51,8 @@ export function RunsChart({ runs }: RunsChartProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Area Chart - Stacked</CardTitle>
-                <CardDescription>
-                    Showing test results for latest 20 runs
-                </CardDescription>
+                <CardTitle>Runs</CardTitle>
+                <CardDescription>Showing run details</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig}>
@@ -67,7 +62,9 @@ export function RunsChart({ runs }: RunsChartProps) {
                         margin={{
                             left: 12,
                             right: 12,
+                            top: 12,
                         }}
+                        stackOffset="expand"
                     >
                         <CartesianGrid vertical={false} />
                         <XAxis
@@ -75,11 +72,10 @@ export function RunsChart({ runs }: RunsChartProps) {
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
-                            //tickFormatter={(value) => value.slice(0, 3)}
                         />
                         <ChartTooltip
                             cursor={false}
-                            content={<ChartTooltipContent indicator="dot" />}
+                            content={<ChartTooltipContent indicator="line" />}
                         />
                         {Object.keys(chartConfig).map((key) => (
                             <Area
@@ -95,19 +91,6 @@ export function RunsChart({ runs }: RunsChartProps) {
                     </AreaChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter>
-                <div className="flex w-full items-start gap-2 text-sm">
-                    <div className="grid gap-2">
-                        <div className="flex items-center gap-2 font-medium leading-none">
-                            Trending up by 5.2% this month{" "}
-                            <TrendingUp className="h-4 w-4" />
-                        </div>
-                        <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                            January - June 2024
-                        </div>
-                    </div>
-                </div>
-            </CardFooter>
         </Card>
     );
 }

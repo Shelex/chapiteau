@@ -1,7 +1,12 @@
+import fs from "node:fs";
 import { type Report, type BuildInfo } from "~/lib/parser";
 import { files, runs, testAttachments, tests } from "../db/schema";
 import { db } from "../db";
 import { env } from "~/env";
+import { eq, and, gt, lt, ne, desc, asc } from "drizzle-orm";
+import { NextResponse } from "next/server";
+import { userIsTeamMember } from "./users";
+import { auth } from "~/auth";
 
 interface SaveReportInput {
     createdBy: string;
@@ -123,5 +128,76 @@ export const saveReport = async (input: SaveReportInput) => {
         }
 
         return createdRun;
+    });
+};
+
+export const getRunNeighbors = async (runId: string) => {
+    const found = await db.select().from(runs).where(eq(runs.id, runId));
+
+    const [run] = found;
+
+    if (!run) {
+        return null;
+    }
+
+    const [prevRun] = await db
+        .select()
+        .from(runs)
+        .where(
+            and(
+                eq(runs.projectId, run.projectId),
+                lt(runs.createdAt, run.createdAt)
+            )
+        )
+        .orderBy(desc(runs.createdAt))
+        .limit(1);
+
+    const [nextRun] = await db
+        .select()
+        .from(runs)
+        .where(
+            and(
+                eq(runs.projectId, run.projectId),
+                gt(runs.createdAt, run.createdAt),
+                ne(runs.id, run.id)
+            )
+        )
+        .orderBy(asc(runs.createdAt))
+        .limit(1);
+
+    return {
+        nextRunId: !!nextRun && nextRun.id !== run.id && nextRun.id,
+        prevRunId: !!prevRun && prevRun.id !== run.id && prevRun.id,
+    };
+};
+
+export const deleteRun = async (runId: string, teamId: string) => {
+    const session = await auth();
+    const hasAccess = await userIsTeamMember(session?.user.id ?? "", teamId);
+
+    if (!hasAccess) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const [run] = await db.select().from(runs).where(eq(runs.id, runId));
+
+    if (!run) {
+        return NextResponse.json({ error: "Run not found" }, { status: 404 });
+    }
+
+    return await db.transaction(async (tx) => {
+        await tx
+            .delete(testAttachments)
+            .where(eq(testAttachments.runId, runId));
+        await tx.delete(tests).where(eq(tests.runId, runId));
+        await tx.delete(files).where(eq(files.runId, runId));
+        await tx.delete(runs).where(eq(runs.id, runId));
+        if (run.reportUrl?.includes(env.AUTH_URL)) {
+            const path = `/reports/${teamId}/${run.projectId}/${runId}`;
+            fs.existsSync(path) &&
+                fs.rmdirSync(path, {
+                    recursive: true,
+                });
+        }
     });
 };

@@ -1,26 +1,88 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 import { auth } from "~/auth";
 import { env } from "~/env";
 import { redirect } from "next/navigation";
+import { getRunNeighbors } from "~/server/queries/report";
 
-const addNav = (content: string, fqdn: string, projectId: string) => {
+interface Links {
+    nextRunId?: string;
+    prevRunId?: string;
+}
+
+interface ReportParams {
+    teamId: string;
+    projectId: string;
+    runId: string;
+    filepath?: string[];
+}
+
+const createButton = (id: string, name: string, href?: string) => {
+    const button = `
+        const ${id} = document.createElement('button');
+        ${id}.textContent = '${!href ? "N/A" : name}';
+        ${id}.id = '${id}';
+        ${id}.style.width = '120px';
+        ${id}.style.padding = '10px 20px';
+        ${id}.style.margin = '10px 0px 0px 25px';
+        ${id}.style.fontSize = '14px';`;
+
+    const maybeDisable = !href ? `${id}.disabled = true;` : "";
+
+    const onClick = `function handle${id}Click() {
+            window.location.href = '${href}';
+        };`;
+
+    const registerClick = `${id}.addEventListener('click', handle${id}Click);`;
+
+    return `${button}${maybeDisable}${onClick}${registerClick}`;
+};
+
+const addNav = (
+    content: string,
+    fqdn: string,
+    options: ReportParams & Links
+) => {
+    const reportBaseUrl = `${fqdn}/reports/${options.teamId}/${options.projectId}`;
+    const buttons = [
+        {
+            id: "back_button",
+            name: "To Project",
+            href: `${fqdn}/project/${options.projectId}`,
+        },
+        {
+            id: "next_button",
+            name: "Next Report",
+            href: options.nextRunId && `${reportBaseUrl}/${options.nextRunId}`,
+        },
+        {
+            id: "prev_button",
+            name: "Prev Report",
+            href: options.prevRunId && `${reportBaseUrl}/${options.prevRunId}`,
+        },
+    ];
+
+    const createdButtons = buttons
+        .map((button) => ({
+            id: button.id,
+            content: createButton(button.id, button.name, button.href),
+        }));
+
+    const buttonContent = createdButtons.map((b) => b.content).join("\n");
+    const appendButtons = createdButtons
+        .map((b) => `buttonGroup.appendChild(${b.id});`)
+        .join("\n");
+
     const addButton = `
-    <script >
-        const button = document.createElement('button');
-        button.textContent = 'To Project';
-        button.id = 'backToDashboard';
-        button.style.padding = '10px 20px';
-        button.style.margin = '10px 0px 0px 25px';
-        button.style.fontSize = '14px';
-        function handleClick() {
-            window.location.href = '${fqdn}/project/${projectId}';
-        };
+    <script>
+        const buttonGroup = document.createElement('div');
 
-        button.addEventListener('click', handleClick);
+        ${buttonContent}
+        ${appendButtons}
+        
         const body = document.querySelector('body');
-        body.prepend(button);
+        body.prepend(buttonGroup);
     </script>
     `;
 
@@ -28,16 +90,11 @@ const addNav = (content: string, fqdn: string, projectId: string) => {
 };
 
 export async function GET(
-    req: Request,
+    req: NextRequest,
     {
         params,
     }: {
-        params: {
-            teamId: string;
-            projectId: string;
-            runId: string;
-            filepath?: string[];
-        };
+        params: ReportParams;
     }
 ) {
     const session = await auth();
@@ -65,9 +122,16 @@ export async function GET(
             try {
                 await fs.access(indexPath);
                 const content = await fs.readFile(indexPath, "utf-8");
-                return new Response(addNav(content, env.AUTH_URL, projectId), {
-                    headers: { "Content-Type": "text/html" },
-                });
+                const links = (await getRunNeighbors(runId)) ?? {};
+                return new Response(
+                    addNav(content, env.AUTH_URL, {
+                        ...params,
+                        ...links,
+                    }),
+                    {
+                        headers: { "Content-Type": "text/html" },
+                    }
+                );
             } catch (error) {
                 return NextResponse.json(
                     { error: "Index file not found" },
