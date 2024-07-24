@@ -13,6 +13,7 @@ import {
     AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
 
 interface DeleteRunButtonProps {
     teamId?: string;
@@ -23,11 +24,17 @@ export default function DeleteRunButton({
     teamId,
     runId,
 }: DeleteRunButtonProps) {
-    const deleteRun = useCallback(async (teamId: string, runId: string) => {
-        await fetch(`/api/teams/${teamId}/runs/${runId}`, {
-            method: "DELETE",
-        });
-    }, []);
+    const router = useRouter();
+
+    const deleteRun = useCallback(
+        async (teamId: string, runId: string) => {
+            await fetch(`/api/teams/${teamId}/runs/${runId}`, {
+                method: "DELETE",
+            });
+            router.refresh();
+        },
+        [router]
+    );
 
     return (
         !!teamId && (

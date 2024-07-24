@@ -10,7 +10,7 @@ interface RunsProps {
     teamId: string;
 }
 
-export default function RunView({ teamId, run }: RunsProps) {
+export default function RunView({ teamId, run }: Readonly<RunsProps>) {
     return (
         <div className="p-4">
             <div key={run.id}>
