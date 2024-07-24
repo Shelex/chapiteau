@@ -70,17 +70,33 @@ export async function POST(
         params.projectId,
         createdRun.id
     );
-    await fs.mkdir(baseDestination, { recursive: true });
 
-    for (const file of files) {
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const relativePath = file.name;
-        const fullDestinationPath = path.join(baseDestination, relativePath);
-        const destinationDir = path.dirname(fullDestinationPath);
+    console.log(
+        `going to save report for run ${createdRun.id} to ${baseDestination}`
+    );
 
-        await fs.mkdir(destinationDir, { recursive: true });
-        await fs.writeFile(fullDestinationPath, buffer);
+    try {
+        await fs.mkdir(baseDestination, { recursive: true });
+
+        for (const file of files) {
+            const arrayBuffer = await file.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const relativePath = file.name;
+            const fullDestinationPath = path.join(
+                baseDestination,
+                relativePath
+            );
+            const destinationDir = path.dirname(fullDestinationPath);
+
+            await fs.mkdir(destinationDir, { recursive: true });
+            await fs.writeFile(fullDestinationPath, buffer);
+        }
+    } catch (e) {
+        console.error("Failed to save report files", e);
+        return NextResponse.json(
+            { error: "Failed to save report files" },
+            { status: 500 }
+        );
     }
 
     return NextResponse.json({

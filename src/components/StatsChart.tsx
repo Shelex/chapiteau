@@ -70,8 +70,6 @@ export function StatChart({ stats }: StatChartProps) {
         },
     ];
 
-    console.log(chartData);
-
     return (
         <Card className="flex flex-col">
             <CardHeader className="items-center pb-0">
