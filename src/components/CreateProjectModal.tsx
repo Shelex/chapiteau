@@ -1,20 +1,23 @@
 "use client";
 import React, { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
+import {
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    useDisclosure,
+} from "@nextui-org/modal";
 
 interface CreateProjectModalProps {
-    isOpen: boolean;
-    onClose: () => void;
     teamId: string;
 }
 
-const CreateProjectModal = ({
-    isOpen,
-    onClose,
-    teamId,
-}: CreateProjectModalProps) => {
+const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ teamId }) => {
     const [projectName, setProjectName] = useState("");
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateProject = async () => {
         const response = await fetch(`/api/teams/${teamId}/projects`, {
@@ -26,7 +29,6 @@ const CreateProjectModal = ({
         });
 
         if (response.ok) {
-            onClose();
             return;
         }
 
@@ -34,18 +36,41 @@ const CreateProjectModal = ({
         console.error(error);
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div className="modal">
-            <h2>Create New Project</h2>
-            <Input
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                placeholder="Project Name"
-            />
-            <Button onClick={handleCreateProject}>Create</Button>
-            <Button onClick={onClose}>Close</Button>
+        <div>
+            <Button color="success" onPress={onOpen}>+ Add Project</Button>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">
+                                Create New Team
+                            </ModalHeader>
+                            <ModalBody>
+                                <Input
+                                    value={projectName}
+                                    onChange={(e) =>
+                                        setProjectName(e.target.value)
+                                    }
+                                    placeholder="Project Name"
+                                />
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" onPress={onClose}>
+                                    Close
+                                </Button>
+                                <Button
+                                    color="primary"
+                                    onPress={onClose}
+                                    onClick={handleCreateProject}
+                                >
+                                    Create
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     );
 };

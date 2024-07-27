@@ -1,9 +1,17 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { type User } from "~/server/db/users";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
 import { useRouter } from "next/navigation";
+import {
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    useDisclosure,
+} from "@nextui-org/modal";
 
 interface CreateTeamModalProps {
     userId: User["id"];
@@ -11,8 +19,9 @@ interface CreateTeamModalProps {
 
 const CreateTeamModal = ({ userId }: CreateTeamModalProps) => {
     const router = useRouter();
-    const [isOpen, setIsOpen] = useState(false);
     const [teamName, setTeamName] = useState("");
+
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateTeam = useCallback(async () => {
         const response = await fetch("/api/teams", {
@@ -24,7 +33,6 @@ const CreateTeamModal = ({ userId }: CreateTeamModalProps) => {
         });
 
         if (response.ok) {
-            setIsOpen(false);
             router.refresh();
             return;
         }
@@ -35,19 +43,39 @@ const CreateTeamModal = ({ userId }: CreateTeamModalProps) => {
 
     return (
         <div>
-            <Button onClick={() => setIsOpen(true)}>+ Add Team</Button>
-            {isOpen && (
-                <div className="modal">
-                    <h2>Create New Team</h2>
-                    <Input
-                        value={teamName}
-                        onChange={(e) => setTeamName(e.target.value)}
-                        placeholder="Team Name"
-                    />
-                    <Button onClick={handleCreateTeam}>Create</Button>
-                    <Button onClick={() => setIsOpen(false)}>Close</Button>
-                </div>
-            )}
+            <Button color="success" onPress={onOpen}>+ Add Team</Button>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">
+                                Create New Team
+                            </ModalHeader>
+                            <ModalBody>
+                                <Input
+                                    value={teamName}
+                                    onChange={(e) =>
+                                        setTeamName(e.target.value)
+                                    }
+                                    placeholder="Team Name"
+                                />
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" onPress={onClose}>
+                                    Close
+                                </Button>
+                                <Button
+                                    color="primary"
+                                    onPress={onClose}
+                                    onClick={handleCreateTeam}
+                                >
+                                    Create
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     );
 };

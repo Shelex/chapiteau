@@ -58,7 +58,7 @@ export function RunsChart({ runs }: RunsChartProps) {
                 <ChartContainer config={chartConfig}>
                     <AreaChart
                         accessibilityLayer
-                        data={chartData}
+                        data={chartData.reverse()}
                         margin={{
                             left: 12,
                             right: 12,

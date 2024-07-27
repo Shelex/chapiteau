@@ -1,10 +1,18 @@
+import { Button } from "@nextui-org/react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "~/auth";
+import CreateProjectModal from "~/components/CreateProjectModal";
 import CreateTeamModal from "~/components/CreateTeamModal";
+import ProjectList from "~/components/ProjectList";
 import TeamSelector from "~/components/TeamSelector";
 import { getTeams } from "~/server/queries";
 
-export default async function Home() {
+interface HomeProps {
+    searchParams?: { selectedTeam?: string };
+}
+
+export default async function Home({ searchParams }: Readonly<HomeProps>) {
     const session = await auth();
 
     if (!session?.user?.id) {
@@ -13,19 +21,39 @@ export default async function Home() {
 
     const teams = (await getTeams(session?.user.id)) ?? [];
 
+    const selectedTeam = searchParams?.selectedTeam ?? teams?.at(0)?.id;
+
     return (
         <main className="text-center mt-10">
             <div className="flex flex-col bg-gray-100 rounded-md">
                 <div className="p-4 font-bold bg-gray-200 rounded-t-md">
                     Teams
                 </div>
-                <TeamSelector teams={teams} />
-            </div>
-            <div className="flex flex-col bg-gray-100 rounded-md">
-                <div className="p-4 font-bold bg-gray-200 rounded-t-md">
-                    Create Team
-                </div>
                 <CreateTeamModal userId={session?.user?.id} />
+                <TeamSelector
+                    teams={teams}
+                    current={selectedTeam}
+                    param="selectedTeam"
+                />
+                {selectedTeam && (
+                    <>
+                        <Link
+                            href={`/team/${selectedTeam}/`}
+                            legacyBehavior
+                            passHref
+                        >
+                            <Button color="secondary">Manage team</Button>
+                        </Link>
+
+                        <div className="flex flex-col bg-gray-100 rounded-md">
+                            <div className="p-4 font-bold bg-gray-200 rounded-t-md">
+                                Projects
+                            </div>
+                            <ProjectList teamId={selectedTeam} />
+                            <CreateProjectModal teamId={selectedTeam} />
+                        </div>
+                    </>
+                )}
             </div>
             <div className="flex flex-col bg-gray-100 rounded-md">
                 <div className="p-4 font-bold bg-gray-200 rounded-t-md">

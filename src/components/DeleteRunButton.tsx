@@ -2,17 +2,14 @@
 
 import { useCallback } from "react";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "./ui/alert-dialog";
-import { Button } from "./ui/button";
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    useDisclosure,
+} from "@nextui-org/modal";
+import { Button } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
 
 interface DeleteRunButtonProps {
@@ -26,6 +23,8 @@ export default function DeleteRunButton({
 }: DeleteRunButtonProps) {
     const router = useRouter();
 
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
     const deleteRun = useCallback(
         async (teamId: string, runId: string) => {
             await fetch(`/api/teams/${teamId}/runs/${runId}`, {
@@ -38,31 +37,48 @@ export default function DeleteRunButton({
 
     return (
         !!teamId && (
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="destructive">Delete Run</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            Are you absolutely sure?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete your run details and and remove report if it
-                            is saved with our servers.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={async () => await deleteRun(teamId, runId)}
-                        >
-                            Continue
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <>
+                <Button color="danger" onPress={onOpen}>
+                    Delete Run
+                </Button>
+                <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                    <ModalContent>
+                        {(onClose) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1">
+                                    Are you absolutely sure?
+                                </ModalHeader>
+                                <ModalBody>
+                                    <p>
+                                        This action cannot be undone. This will
+                                        permanently delete your run details and
+                                        and remove report if it is saved with
+                                        our servers.
+                                    </p>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button
+                                        color="primary"
+                                        variant="light"
+                                        onPress={onClose}
+                                    >
+                                        Close
+                                    </Button>
+                                    <Button
+                                        color="danger"
+                                        onPress={onClose}
+                                        onClick={async () =>
+                                            await deleteRun(teamId, runId)
+                                        }
+                                    >
+                                        Sure, Delete
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
+                </Modal>
+            </>
         )
     );
 }

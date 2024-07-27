@@ -2,7 +2,7 @@
 import { type Run } from "~/server/db/schema";
 import { StatChart } from "./StatsChart";
 import Link from "next/link";
-import { Button } from "./ui/button";
+import { Button } from "@nextui-org/button";
 import DeleteRunButton from "./DeleteRunButton";
 
 interface RunsProps {

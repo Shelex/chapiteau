@@ -1,5 +1,5 @@
+import { Button } from "@nextui-org/button";
 import { signIn, signOut } from "~/auth";
-import { Button } from "../ui/button";
 
 export function SignIn({
     provider,
@@ -31,7 +31,7 @@ export function SignOut(props: React.ComponentPropsWithRef<typeof Button>) {
             }}
             className="w-full"
         >
-            <Button variant="ghost" className="w-full p-0" {...props}>
+            <Button variant="ghost" color="warning" className="w-full p-0" {...props}>
                 Sign Out
             </Button>
         </form>

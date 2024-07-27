@@ -1,18 +1,29 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { type Team } from "~/server/db/schema";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
+import { DatePicker } from "@nextui-org/date-picker";
+import { getLocalTimeZone, today } from "@internationalized/date";
+import {
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    useDisclosure,
+} from "@nextui-org/modal";
 
 interface CreateApiKeyModalProps {
     team: Team;
 }
 
 const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
-    const [isOpen, setIsOpen] = useState(false);
     const [keyName, setKeyName] = useState("");
-    const [expireAt, setExpireAt] = useState(Date.now());
+    const [expireAt, setExpireAt] = useState(today(getLocalTimeZone()));
     const [token, setToken] = useState("");
+
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateApiKey = useCallback(async () => {
         const response = await fetch(`/api/teams/${team.id}/tokens`, {
@@ -30,7 +41,6 @@ const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
         if (response.ok) {
             const body = (await response.json()) as { token: string };
             setToken(body.token);
-            setIsOpen(false);
             return;
         }
 
@@ -40,33 +50,51 @@ const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
 
     return (
         <div>
-            <Button onClick={() => setIsOpen(true)}>
-                + Add Api Key for {team.name}
-            </Button>
+            <Button color="success" onPress={onOpen}>+ Add Api Key for {team.name}</Button>
             {token && (
                 <>
                     <p>Please copy your api key:</p>
                     <code>{token}</code>
                 </>
             )}
-            {isOpen && (
-                <div className="modal">
-                    <h2>Create New Api Key</h2>
-
-                    <Input
-                        value={keyName}
-                        onChange={(e) => setKeyName(e.target.value)}
-                        placeholder="Api Key Name"
-                    />
-                    <Input
-                        value={expireAt}
-                        onChange={(e) => setExpireAt(Number(e.target.value))}
-                        placeholder="Expire At"
-                    />
-                    <Button onClick={handleCreateApiKey}>Create</Button>
-                    <Button onClick={() => setIsOpen(false)}>Close</Button>
-                </div>
-            )}
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">
+                                Create New Api Key
+                            </ModalHeader>
+                            <ModalBody>
+                                <Input
+                                    isRequired
+                                    value={keyName}
+                                    onChange={(e) => setKeyName(e.target.value)}
+                                    placeholder="Api Key Name"
+                                />
+                                <DatePicker
+                                    isRequired
+                                    hourCycle={24}
+                                    label="Expire At"
+                                    value={expireAt}
+                                    onChange={setExpireAt}
+                                />
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" onPress={onClose}>
+                                    Close
+                                </Button>
+                                <Button
+                                    color="primary"
+                                    onPress={onClose}
+                                    onClick={handleCreateApiKey}
+                                >
+                                    Create
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     );
 };

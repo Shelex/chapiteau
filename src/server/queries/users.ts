@@ -9,6 +9,7 @@ import {
     projects,
     runs,
 } from "../db/schema";
+import { alias } from "drizzle-orm/pg-core";
 
 export const deleteUser = async (id: string) => {
     return await db.delete(users).where(eq(users.id, id)).returning();
@@ -57,9 +58,30 @@ export const getProjectDashboard = async (projectId: Project["id"]) => {
     };
 };
 
-export const userIsTeamMember = async (userId: User["id"], teamId: Team["id"]) => {
-    const [member] = await db
+export const getTeam = async (teamId: Team["id"]) => {
+    const [team] = await db
         .select()
+        .from(teams)
+        .where(eq(teams.id, teamId))
+        .limit(1);
+    return team;
+};
+
+export const getTeamMembers = async (teamId: Team["id"]) => {
+    const member = alias(teamMembers, "member");
+    return await db
+        .select()
+        .from(member)
+        .where(eq(member.teamId, teamId))
+        .leftJoin(users, eq(member.userId, users.id));
+};
+
+export const userIsTeamMember = async (
+    userId: User["id"],
+    teamId: Team["id"]
+) => {
+    const [member] = await db
+        .select({})
         .from(teamMembers)
         .where(
             and(eq(teamMembers.userId, userId), eq(teamMembers.teamId, teamId))
@@ -67,4 +89,16 @@ export const userIsTeamMember = async (userId: User["id"], teamId: Team["id"]) =
         .limit(1);
 
     return !!member;
+};
+
+export const userIsAdmin = async (userId: User["id"], teamId: Team["id"]) => {
+    const [member] = await db
+        .select({ isAdmin: teamMembers.isAdmin })
+        .from(teamMembers)
+        .where(
+            and(eq(teamMembers.userId, userId), eq(teamMembers.teamId, teamId))
+        )
+        .limit(1);
+
+    return !!member?.isAdmin;
 };
