@@ -23,7 +23,7 @@ export default function RunView({ teamId, run, isAdmin }: Readonly<RunsProps>) {
                         <Button>Open Report</Button>
                     </Link>
                 )}
-                {!isAdmin && <DeleteRunButton teamId={teamId} runId={run.id} />}
+                {isAdmin && <DeleteRunButton teamId={teamId} runId={run.id} />}
                 <p>Run status: {run.ok ? "Passed" : "Failed"}</p>
                 <p>CreatedAt: {run.createdAt.toString()}</p>
                 <StatChart stats={run} />

@@ -21,8 +21,8 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
         redirect("/api/auth/signin");
     }
 
-    const isAdmin = await userIsAdmin(session.user.id);
     const { project, runs } = await getProjectDashboard(params.id ?? "");
+    const isAdmin = await userIsAdmin(session.user.id, project?.teamId);
 
     return (
         <main className="text-center mt-10">
@@ -33,7 +33,11 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
                     <ul>
                         {runs.map((run) => (
                             <li key={run.id}>
-                                <RunView teamId={project?.teamId} run={run} isAdmin={isAdmin} />
+                                <RunView
+                                    teamId={project?.teamId}
+                                    run={run}
+                                    isAdmin={isAdmin}
+                                />
                             </li>
                         ))}
                     </ul>
