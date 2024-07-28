@@ -21,7 +21,8 @@ export async function GET(
     const session = await auth();
     if (!session?.user?.id) {
         console.log(`GEt INVITE`);
-        console.log(req.url);
+        console.log(`req.url=${req.url}`);
+        console.log(`req.nextUrl.href=${req.nextUrl.href}`);
         redirect("/api/auth/signin?callbackUrl=" + req.url);
     }
 
