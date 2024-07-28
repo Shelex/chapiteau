@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { createTeam, getTeams } from "~/server/queries";
 import { z } from "zod";
+
 import { auth } from "~/auth";
+import { createTeam, getTeams } from "~/server/queries";
 
 const createTeamRequestSchema = z.object({
     name: z.string(),

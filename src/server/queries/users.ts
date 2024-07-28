@@ -1,15 +1,17 @@
-import { desc, eq, and, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+
 import { db } from "~/server/db";
-import { users, type User } from "~/server/db/users";
+import { type User,users } from "~/server/db/users";
+
 import {
-    type Team,
-    teams,
-    teamMembers,
     type Project,
     projects,
     runs,
+    type Team,
+    teamMembers,
+    teams,
 } from "../db/schema";
-import { alias } from "drizzle-orm/pg-core";
 
 export const deleteUser = async (id: string) => {
     return await db.delete(users).where(eq(users.id, id)).returning();

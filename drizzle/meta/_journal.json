@@ -8,6 +8,13 @@
       "when": 1721743793464,
       "tag": "0000_flowery_darwin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1722165237949,
+      "tag": "0001_abnormal_goblin_queen",
+      "breakpoints": true
     }
   ]
 }

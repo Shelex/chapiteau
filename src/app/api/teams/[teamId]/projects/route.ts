@@ -1,8 +1,9 @@
-import { NextResponse, type NextRequest } from "next/server";
 import { revalidateTag } from "next/cache";
-import { createProject, getProjects } from "~/server/queries";
+import { type NextRequest,NextResponse } from "next/server";
 import { z } from "zod";
+
 import { auth } from "~/auth";
+import { createProject, getProjects } from "~/server/queries";
 
 const createProjectRequestSchema = z.object({
     name: z.string(),

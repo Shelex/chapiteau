@@ -1,12 +1,15 @@
 import fs from "node:fs";
-import { type Report, type BuildInfo } from "~/lib/parser";
-import { files, runs, testAttachments, tests } from "../db/schema";
-import { db } from "../db";
-import { env } from "~/env";
-import { eq, and, gt, lt, ne, desc, asc } from "drizzle-orm";
+
+import { and, asc,desc, eq, gt, lt, ne } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { userIsTeamMember } from "./users";
+
 import { auth } from "~/auth";
+import { env } from "~/env";
+import { type BuildInfo,type Report } from "~/lib/parser";
+import { db } from "~/server/db";
+import { files, runs, testAttachments, tests } from "~/server/db/schema";
+
+import { userIsTeamMember } from "./users";
 
 interface SaveReportInput {
     createdBy: string;

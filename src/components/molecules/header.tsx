@@ -1,7 +1,8 @@
-import { MainNav } from "./main-nav";
-import UserActions from "./user-actions";
-import { SignIn } from "./auth-components";
 import { type Session } from "next-auth";
+
+import { SignIn } from "./AuthComponents";
+import { MainNav } from "./MainNav";
+import UserActions from "./UserNavActions";
 
 export default function Header({
     session,

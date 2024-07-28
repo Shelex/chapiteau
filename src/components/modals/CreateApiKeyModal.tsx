@@ -1,10 +1,8 @@
 "use client";
-import React, { useCallback, useState } from "react";
-import { type Team } from "~/server/db/schema";
-import { Button } from "@nextui-org/button";
-import { Input } from "@nextui-org/input";
-import { DatePicker } from "@nextui-org/date-picker";
 import { getLocalTimeZone, today } from "@internationalized/date";
+import { Button } from "@nextui-org/button";
+import { DatePicker } from "@nextui-org/date-picker";
+import { Input } from "@nextui-org/input";
 import {
     Modal,
     ModalBody,
@@ -13,6 +11,9 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
+import React, { useCallback, useState } from "react";
+
+import { type Team } from "~/server/db/schema";
 
 interface CreateApiKeyModalProps {
     team: Team;

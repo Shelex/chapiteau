@@ -1,12 +1,13 @@
 import {
-    pgTable,
-    text,
-    varchar,
-    timestamp,
     boolean,
-    smallint,
     integer,
+    pgTable,
+    smallint,
+    text,
+    timestamp,
+    varchar,
 } from "drizzle-orm/pg-core";
+
 import { users } from "./users";
 
 export const teams = pgTable("teams", {

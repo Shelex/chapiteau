@@ -1,6 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { deleteApiKey } from "~/server/queries";
+import { type NextRequest,NextResponse } from "next/server";
+
 import { auth } from "~/auth";
+import { deleteApiKey } from "~/server/queries";
 
 export async function DELETE(
     _: NextRequest,

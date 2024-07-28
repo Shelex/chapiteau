@@ -1,8 +1,10 @@
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+
+import { isUuid } from "~/lib/utils";
+
 import { db } from "../db";
 import { apiKeys, projects, teamMembers, teams } from "../db/schema";
-import { isUuid } from "~/lib/utils";
-import { revalidatePath } from "next/cache";
 
 export const createTeam = async (name: string, userId: string) => {
     return await db.transaction(async (tx) => {

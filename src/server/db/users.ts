@@ -1,9 +1,9 @@
 import {
-    timestamp,
-    pgTable,
-    text,
-    primaryKey,
     integer,
+    pgTable,
+    primaryKey,
+    text,
+    timestamp,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -12,7 +12,7 @@ export const users = pgTable("user", {
         .primaryKey()
         .$defaultFn(() => crypto.randomUUID()),
     name: text("name"),
-    email: text("email").notNull(),
+    email: text("email").unique(),
     emailVerified: timestamp("emailVerified", { mode: "date" }),
     image: text("image"),
 });

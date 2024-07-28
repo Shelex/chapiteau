@@ -1,13 +1,14 @@
-import { redirect } from "next/navigation";
-import { auth } from "~/auth";
 import dynamic from "next/dynamic";
-const Project = dynamic(() => import("~/components/Project"), {
+import { redirect } from "next/navigation";
+
+import { auth } from "~/auth";
+import { RunsChart } from "~/components/charts/RunsChart";
+import RunView from "~/components/run/RunView";
+import { getProjectDashboard } from "~/server/queries";
+const ProjectView = dynamic(() => import("~/components/project/ProjectView"), {
     ssr: false,
     loading: () => <p>Loading project...</p>,
 });
-import { getProjectDashboard } from "~/server/queries";
-import { RunsChart } from "~/components/Chart";
-import RunView from "~/components/Run";
 
 interface ProjectProps {
     params: { id: string };
@@ -24,7 +25,7 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
 
     return (
         <main className="text-center mt-10">
-            {project && <Project project={project} />}
+            {project && <ProjectView project={project} />}
             {project?.teamId && (
                 <div className="mt-10">
                     {runs?.length > 1 && <RunsChart runs={runs} />}

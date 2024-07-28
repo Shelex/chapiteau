@@ -6,7 +6,7 @@ interface ProjectProps {
     project: Project;
 }
 
-export default function Project({ project }: ProjectProps) {
+export default function ProjectView({ project }: ProjectProps) {
     if (!project) {
         return null;
     }

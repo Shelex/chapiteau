@@ -1,8 +1,10 @@
 "use client";
-import { type Run } from "~/server/db/schema";
-import { StatChart } from "./StatsChart";
-import Link from "next/link";
 import { Button } from "@nextui-org/button";
+import Link from "next/link";
+
+import { type Run } from "~/server/db/schema";
+
+import { StatChart } from "../charts/StatsChart";
 import DeleteRunButton from "./DeleteRunButton";
 
 interface RunsProps {

@@ -1,7 +1,8 @@
-import React from "react";
-import { type Team } from "~/server/db/schema";
 import { Button } from "@nextui-org/button";
 import Link from "next/link";
+import React from "react";
+
+import { type Team } from "~/server/db/schema";
 import { getProjects } from "~/server/queries";
 
 interface ProjectListProps {

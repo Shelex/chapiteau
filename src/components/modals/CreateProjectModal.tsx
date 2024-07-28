@@ -1,9 +1,6 @@
 "use client";
-import React, { useCallback, useState } from "react";
-import { type User } from "~/server/db/users";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
-import { useRouter } from "next/navigation";
 import {
     Modal,
     ModalBody,
@@ -12,38 +9,36 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
+import React, { useState } from "react";
 
-interface CreateTeamModalProps {
-    userId: User["id"];
+interface CreateProjectModalProps {
+    teamId: string;
 }
 
-const CreateTeamModal = ({ userId }: CreateTeamModalProps) => {
-    const router = useRouter();
-    const [teamName, setTeamName] = useState("");
-
+const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ teamId }) => {
+    const [projectName, setProjectName] = useState("");
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-    const handleCreateTeam = useCallback(async () => {
-        const response = await fetch("/api/teams", {
+    const handleCreateProject = async () => {
+        const response = await fetch(`/api/teams/${teamId}/projects`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ name: teamName, userId }),
+            body: JSON.stringify({ name: projectName, teamId }),
         });
 
         if (response.ok) {
-            router.refresh();
             return;
         }
 
         const error = await response.text();
         console.error(error);
-    }, [router, teamName, userId]);
+    };
 
     return (
         <div>
-            <Button color="success" onPress={onOpen}>+ Add Team</Button>
+            <Button color="success" onPress={onOpen}>+ Add Project</Button>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
                     {(onClose) => (
@@ -53,11 +48,11 @@ const CreateTeamModal = ({ userId }: CreateTeamModalProps) => {
                             </ModalHeader>
                             <ModalBody>
                                 <Input
-                                    value={teamName}
+                                    value={projectName}
                                     onChange={(e) =>
-                                        setTeamName(e.target.value)
+                                        setProjectName(e.target.value)
                                     }
-                                    placeholder="Team Name"
+                                    placeholder="Project Name"
                                 />
                             </ModalBody>
                             <ModalFooter>
@@ -67,7 +62,7 @@ const CreateTeamModal = ({ userId }: CreateTeamModalProps) => {
                                 <Button
                                     color="primary"
                                     onPress={onClose}
-                                    onClick={handleCreateTeam}
+                                    onClick={handleCreateProject}
                                 >
                                     Create
                                 </Button>
@@ -80,4 +75,4 @@ const CreateTeamModal = ({ userId }: CreateTeamModalProps) => {
     );
 };
 
-export default CreateTeamModal;
+export default CreateProjectModal;

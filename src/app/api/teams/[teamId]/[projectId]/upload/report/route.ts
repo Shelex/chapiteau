@@ -1,9 +1,11 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
+import { type NextRequest, NextResponse } from "next/server";
 import path from "path";
-import { verifyApiKey } from "../middleware";
+
 import { type BuildInfo, parseHtmlReport } from "~/lib/parser";
-import { saveReport } from "~/server/queries/report";
+import { saveReport } from "~/server/queries";
+
+import { verifyApiKey } from "../middleware";
 
 export async function POST(
     req: NextRequest,

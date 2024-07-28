@@ -1,10 +1,11 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
+import { redirect } from "next/navigation";
+import { type NextRequest, NextResponse } from "next/server";
 import path from "path";
+
 import { auth } from "~/auth";
 import { env } from "~/env";
-import { redirect } from "next/navigation";
-import { getRunNeighbors } from "~/server/queries/report";
+import { getRunNeighbors } from "~/server/queries";
 
 interface Links {
     nextRunId?: string;
@@ -63,11 +64,10 @@ const addNav = (
         },
     ];
 
-    const createdButtons = buttons
-        .map((button) => ({
-            id: button.id,
-            content: createButton(button.id, button.name, button.href),
-        }));
+    const createdButtons = buttons.map((button) => ({
+        id: button.id,
+        content: createButton(button.id, button.name, button.href),
+    }));
 
     const buttonContent = createdButtons.map((b) => b.content).join("\n");
     const appendButtons = createdButtons

@@ -1,6 +1,7 @@
 import React from "react";
+
+import TeamMembersTabs from "~/components/molecules/MembersTabs";
 import { getApiKeys, getTeam, getTeamMembers } from "~/server/queries";
-import TeamMembersTabs from "./molecules/members-tabs";
 
 interface ManageTeamProps {
     id: string;

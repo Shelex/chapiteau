@@ -1,15 +1,15 @@
 "use client";
 import { Button } from "@nextui-org/button";
-import { User } from "@nextui-org/user";
 import {
     Dropdown,
-    DropdownTrigger,
-    DropdownMenu,
     DropdownItem,
+    DropdownMenu,
+    DropdownTrigger,
 } from "@nextui-org/dropdown";
+import { User } from "@nextui-org/user";
 import { type Session } from "next-auth";
-import React from "react";
 import { signOut } from "next-auth/react";
+import React from "react";
 
 export default function UserActions({ session }: { session: Session }) {
     return (

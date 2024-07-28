@@ -1,9 +1,11 @@
 "use client";
 import { Card, CardBody, Tab, Tabs } from "@nextui-org/react";
 import React from "react";
-import TeamMembersTable from "./members-table";
-import ApiKeysTable from "./api-keys-table";
-import { type Team, type ApiKey } from "~/server/db/schema";
+
+import { type ApiKey,type Team } from "~/server/db/schema";
+
+import ApiKeysTable from "../tables/ApiKeysTable";
+import TeamMembersTable from "../tables/MembersTable";
 
 interface TeamMembersTabsProps {
     team?: Team;
@@ -11,7 +13,7 @@ interface TeamMembersTabsProps {
         user: {
             id: string;
             name: string | null;
-            email: string;
+            email?: string | null;
         } | null;
         member: {
             isAdmin: boolean;

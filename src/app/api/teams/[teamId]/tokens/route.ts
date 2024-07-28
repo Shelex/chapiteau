@@ -1,7 +1,8 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { createApiKey, getApiKeys } from "~/server/queries";
+import { type NextRequest,NextResponse } from "next/server";
 import { z } from "zod";
+
 import { auth } from "~/auth";
+import { createApiKey, getApiKeys } from "~/server/queries";
 
 const createApiKeyRequestSchema = z.object({
     name: z.string(),

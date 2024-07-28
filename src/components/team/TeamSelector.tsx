@@ -1,9 +1,10 @@
 "use client";
-import React from "react";
-import { type Team } from "~/server/db/schema";
-import { Select, SelectItem } from "@nextui-org/select";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { type SharedSelection } from "@nextui-org/react";
+import { Select, SelectItem } from "@nextui-org/select";
+import { usePathname, useRouter,useSearchParams } from "next/navigation";
+import React from "react";
+
+import { type Team } from "~/server/db/schema";
 
 interface TeamSelectorProps {
     teams: Team[];

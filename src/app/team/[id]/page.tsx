@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation";
-import { auth } from "~/auth";
 import dynamic from "next/dynamic";
+import { redirect } from "next/navigation";
+
+import { auth } from "~/auth";
 import { getTeam, userIsAdmin } from "~/server/queries";
-const Team = dynamic(() => import("~/components/ManageTeam"), {
+const Team = dynamic(() => import("~/components/team/ManageTeam"), {
     ssr: false,
     loading: () => <p>Loading team members...</p>,
 });

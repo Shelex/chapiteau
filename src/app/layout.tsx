@@ -1,10 +1,12 @@
+import "./globals.css";
+
+import { NextUIProvider } from "@nextui-org/react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import Header from "~/components/molecules/header";
-import { auth } from "~/auth";
 import { SessionProvider } from "next-auth/react";
-import { NextUIProvider } from "@nextui-org/react";
+
+import { auth } from "~/auth";
+import Header from "~/components/molecules/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -1,7 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { parseHtmlReport, type BuildInfo } from "~/lib/parser";
+
+import { type BuildInfo,parseHtmlReport } from "~/lib/parser";
+import { saveReport } from "~/server/queries";
+
 import { verifyApiKey } from "../middleware";
-import { saveReport } from "~/server/queries/report";
 
 export async function POST(
     req: NextRequest,

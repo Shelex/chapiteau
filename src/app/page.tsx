@@ -1,11 +1,12 @@
 import { Button } from "@nextui-org/react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
 import { auth } from "~/auth";
-import CreateProjectModal from "~/components/CreateProjectModal";
-import CreateTeamModal from "~/components/CreateTeamModal";
-import ProjectList from "~/components/ProjectList";
-import TeamSelector from "~/components/TeamSelector";
+import CreateProjectModal from "~/components/modals/CreateProjectModal";
+import CreateTeamModal from "~/components/modals/CreateTeamModal";
+import ProjectList from "~/components/project/ProjectList";
+import TeamSelector from "~/components/team/TeamSelector";
 import { getTeams } from "~/server/queries";
 
 interface HomeProps {

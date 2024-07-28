@@ -11,8 +11,10 @@ import {
 } from "@nextui-org/react";
 import { DeleteIcon, EditIcon } from "lucide-react";
 import React from "react";
-import { type Team, type ApiKey } from "~/server/db/schema";
-import CreateApiKeyModal from "../CreateApiKeyModal";
+
+import { type ApiKey,type Team } from "~/server/db/schema";
+
+import CreateApiKeyModal from "../modals/CreateApiKeyModal";
 
 interface ApiKeysTableProps {
     apiKeys: Omit<ApiKey, "token" | "teamId">[];

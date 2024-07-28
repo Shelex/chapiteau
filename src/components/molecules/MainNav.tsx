@@ -1,12 +1,12 @@
 "use client";
-
+import { Button } from "@nextui-org/button";
 import Image from "next/image";
+import React from "react";
 
 import { cn } from "~/lib/utils";
-import CustomLink from "./custom-link";
+
 import { NavigationMenuLink } from "../ui/navigation-menu";
-import React from "react";
-import { Button } from "@nextui-org/button";
+import CustomLink from "./CustomLink";
 
 export function MainNav() {
     return (
