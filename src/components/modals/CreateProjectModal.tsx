@@ -9,36 +9,31 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+
+import { createProject } from "~/server/queries";
 
 interface CreateProjectModalProps {
     teamId: string;
 }
 
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ teamId }) => {
+    const router = useRouter();
     const [projectName, setProjectName] = useState("");
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateProject = async () => {
-        const response = await fetch(`/api/teams/${teamId}/projects`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ name: projectName, teamId }),
-        });
-
-        if (response.ok) {
-            return;
-        }
-
-        const error = await response.text();
-        console.error(error);
+        await createProject(projectName, teamId);
+        setProjectName("");
+        router.refresh();
     };
 
     return (
         <div>
-            <Button color="success" onPress={onOpen}>+ Add Project</Button>
+            <Button color="success" onPress={onOpen}>
+                + Add Project
+            </Button>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
                     {(onClose) => (

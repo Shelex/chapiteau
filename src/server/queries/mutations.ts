@@ -1,6 +1,7 @@
+"use server";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 
+import { auth } from "~/auth";
 import { isUuid } from "~/lib/utils";
 
 import { db } from "../db";
@@ -30,8 +31,6 @@ export const createTeam = async (name: string, userId: string) => {
             })
             .returning();
 
-        revalidatePath("/");
-
         return created;
     });
 };
@@ -59,20 +58,29 @@ export const renameProject = async (projectId: string, name: string) => {
 interface ApiKeyInput {
     name: string;
     teamId: string;
-    createdBy: string;
     expireAt: Date;
 }
 
 export const createApiKey = async (apiKey: ApiKeyInput) => {
-    return await db
+    const session = await auth();
+    if (!session?.user?.id) {
+        return;
+    }
+
+    const createdBy =
+        session.user.name ?? session.user.email ?? session.user.id;
+    const expireAt = new Date(apiKey.expireAt);
+    const [created] = await db
         .insert(apiKeys)
         .values({
             name: apiKey.name,
             teamId: apiKey.teamId,
-            createdBy: apiKey.createdBy,
-            expireAt: apiKey.expireAt,
+            createdBy: createdBy,
+            expireAt: expireAt,
         })
         .returning();
+
+    return created;
 };
 
 export const getApiKeys = async (teamId: string) => {

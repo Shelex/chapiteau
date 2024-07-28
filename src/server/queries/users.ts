@@ -1,8 +1,9 @@
+"use server";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "~/server/db";
-import { type User,users } from "~/server/db/users";
+import { type User, users } from "~/server/db/users";
 
 import {
     type Project,
@@ -79,9 +80,12 @@ export const getTeamMembers = async (teamId: Team["id"]) => {
 };
 
 export const userIsTeamMember = async (
-    userId: User["id"],
-    teamId: Team["id"]
+    userId?: User["id"],
+    teamId?: Team["id"]
 ) => {
+    if (!userId || !teamId) {
+        return false;
+    }
     const [member] = await db
         .select({})
         .from(teamMembers)
@@ -93,7 +97,11 @@ export const userIsTeamMember = async (
     return !!member;
 };
 
-export const userIsAdmin = async (userId: User["id"], teamId: Team["id"]) => {
+export const userIsAdmin = async (userId?: User["id"], teamId?: Team["id"]) => {
+    if (!userId || !teamId) {
+        return false;
+    }
+
     const [member] = await db
         .select({ isAdmin: teamMembers.isAdmin })
         .from(teamMembers)

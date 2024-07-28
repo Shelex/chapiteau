@@ -5,7 +5,7 @@ import path from "path";
 
 import { auth } from "~/auth";
 import { env } from "~/env";
-import { getRunNeighbors } from "~/server/queries";
+import { getRunNeighbors, userIsTeamMember } from "~/server/queries";
 
 interface Links {
     nextRunId?: string;
@@ -103,6 +103,15 @@ export async function GET(
     }
 
     const { teamId, projectId, runId, filepath } = params;
+
+    const hasAccess = await userIsTeamMember(session.user.id, params.teamId);
+
+    if (!hasAccess) {
+        return NextResponse.json(
+            { error: "You do not have access to this team" },
+            { status: 403 }
+        );
+    }
 
     const filePath = path.join(
         process.cwd(),

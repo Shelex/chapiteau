@@ -9,10 +9,11 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
-import { useRouter } from "next/navigation";
-import React, { useCallback, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useState } from "react";
 
 import { type User } from "~/server/db/users";
+import { createTeam } from "~/server/queries";
 
 interface CreateTeamModalProps {
     userId: User["id"];
@@ -20,31 +21,28 @@ interface CreateTeamModalProps {
 
 const CreateTeamModal = ({ userId }: CreateTeamModalProps) => {
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [teamName, setTeamName] = useState("");
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-    const handleCreateTeam = useCallback(async () => {
-        const response = await fetch("/api/teams", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ name: teamName, userId }),
-        });
-
-        if (response.ok) {
-            router.refresh();
-            return;
-        }
-
-        const error = await response.text();
-        console.error(error);
-    }, [router, teamName, userId]);
+    const handleCreateTeam = async () => {
+        const created = await createTeam(teamName, userId);
+        setTeamName("");
+        router.refresh();
+        const current = new URLSearchParams(Array.from(searchParams.entries()));
+        created && current.set("selectedTeam", created?.id ?? "");
+        const search = current.toString();
+        const query = search ? `?${search}` : "";
+        void router.push(`${pathname}${query}`);
+    };
 
     return (
         <div>
-            <Button color="success" onPress={onOpen}>+ Add Team</Button>
+            <Button color="success" onPress={onOpen}>
+                + Add Team
+            </Button>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
                     {(onClose) => (

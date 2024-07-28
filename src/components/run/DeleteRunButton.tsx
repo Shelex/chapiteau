@@ -9,7 +9,8 @@ import {
     useDisclosure,
 } from "@nextui-org/modal";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+
+import { deleteRun as deleteServerRun } from "~/server/queries";
 
 interface DeleteRunButtonProps {
     teamId?: string;
@@ -24,15 +25,16 @@ export default function DeleteRunButton({
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-    const deleteRun = useCallback(
-        async (teamId: string, runId: string) => {
-            await fetch(`/api/teams/${teamId}/runs/${runId}`, {
-                method: "DELETE",
-            });
-            router.refresh();
-        },
-        [router]
-    );
+    const deleteRun = async () => {
+        if (!teamId) {
+            return;
+        }
+        const result = await deleteServerRun(runId, teamId);
+        router.refresh();
+        if (result?.error) {
+            console.error(result.error);
+        }
+    };
 
     return (
         !!teamId && (
@@ -66,9 +68,7 @@ export default function DeleteRunButton({
                                     <Button
                                         color="danger"
                                         onPress={onClose}
-                                        onClick={async () =>
-                                            await deleteRun(teamId, runId)
-                                        }
+                                        onClick={deleteRun}
                                     >
                                         Sure, Delete
                                     </Button>

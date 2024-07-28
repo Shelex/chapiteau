@@ -1,15 +1,15 @@
+"use server";
 import fs from "node:fs";
 
-import { and, asc,desc, eq, gt, lt, ne } from "drizzle-orm";
-import { NextResponse } from "next/server";
+import { and, asc, desc, eq, gt, lt, ne } from "drizzle-orm";
 
 import { auth } from "~/auth";
 import { env } from "~/env";
-import { type BuildInfo,type Report } from "~/lib/parser";
+import { type BuildInfo, type Report } from "~/lib/parser";
 import { db } from "~/server/db";
 import { files, runs, testAttachments, tests } from "~/server/db/schema";
 
-import { userIsTeamMember } from "./users";
+import { userIsAdmin } from "./users";
 
 interface SaveReportInput {
     createdBy: string;
@@ -176,16 +176,18 @@ export const getRunNeighbors = async (runId: string) => {
 
 export const deleteRun = async (runId: string, teamId: string) => {
     const session = await auth();
-    const hasAccess = await userIsTeamMember(session?.user.id ?? "", teamId);
+    const hasAccess = await userIsAdmin(session?.user?.id, teamId);
 
     if (!hasAccess) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return { error: "Unauthorized" };
     }
 
     const [run] = await db.select().from(runs).where(eq(runs.id, runId));
 
     if (!run) {
-        return NextResponse.json({ error: "Run not found" }, { status: 404 });
+        return {
+            error: "Run not found",
+        };
     }
 
     return await db.transaction(async (tx) => {

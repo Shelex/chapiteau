@@ -11,51 +11,53 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
-import React, { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 
 import { type Team } from "~/server/db/schema";
+import { createApiKey } from "~/server/queries";
 
 interface CreateApiKeyModalProps {
     team: Team;
 }
 
+interface Created {
+    token?: string;
+    name?: string;
+}
+
 const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
     const [keyName, setKeyName] = useState("");
     const [expireAt, setExpireAt] = useState(today(getLocalTimeZone()));
-    const [token, setToken] = useState("");
+    const [created, setCreated] = useState<Created>({});
+    const router = useRouter();
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-    const handleCreateApiKey = useCallback(async () => {
-        const response = await fetch(`/api/teams/${team.id}/tokens`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                name: keyName,
-                teamId: team.id,
-                expireAt,
-            }),
+    const handleCreateApiKeyServer = async () => {
+        const created = await createApiKey({
+            name: keyName,
+            teamId: team.id,
+            expireAt: expireAt.toDate(getLocalTimeZone()),
         });
-
-        if (response.ok) {
-            const body = (await response.json()) as { token: string };
-            setToken(body.token);
-            return;
-        }
-
-        const error = await response.text();
-        console.error(error);
-    }, [expireAt, keyName, team]);
+        setKeyName("");
+        setExpireAt(today(getLocalTimeZone()));
+        setCreated({
+            token: created?.token,
+            name: created?.name,
+        });
+        router.refresh();
+    };
 
     return (
         <div>
-            <Button color="success" onPress={onOpen}>+ Add Api Key for {team.name}</Button>
-            {token && (
+            <Button color="success" onPress={onOpen}>
+                + Add Api Key for {team.name}
+            </Button>
+            {created?.token && (
                 <>
-                    <p>Please copy your api key:</p>
-                    <code>{token}</code>
+                    <p>Please copy your api key &quot;{created.name}&quot;:</p>
+                    <code>{created.token}</code>
                 </>
             )}
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -87,7 +89,7 @@ const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
                                 <Button
                                     color="primary"
                                     onPress={onClose}
-                                    onClick={handleCreateApiKey}
+                                    onClick={handleCreateApiKeyServer}
                                 >
                                     Create
                                 </Button>
