@@ -60,6 +60,28 @@ export const apiKeys = pgTable("api_keys", {
 
 export type ApiKey = typeof apiKeys.$inferSelect;
 
+export const invites = pgTable("invites", {
+    id: text("id")
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    teamId: text("team_id")
+        .references(() => teams.id)
+        .notNull(),
+    expireAt: timestamp("expire_at", { withTimezone: true }).notNull(),
+    token: text("token")
+        .notNull()
+        .$defaultFn(() => crypto.randomUUID()),
+    limit: smallint("limit").notNull().default(1),
+    count: smallint("count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+    createdBy: text("created_by").notNull(),
+    active: boolean("active").notNull().default(false),
+});
+
+export type Invite = typeof invites.$inferSelect;
+
 export const projects = pgTable("projects", {
     id: text("id")
         .primaryKey()

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "~/auth";
 import { RunsChart } from "~/components/charts/RunsChart";
 import RunView from "~/components/run/RunView";
-import { getProjectDashboard } from "~/server/queries";
+import { getProjectDashboard, userIsAdmin } from "~/server/queries";
 const ProjectView = dynamic(() => import("~/components/project/ProjectView"), {
     ssr: false,
     loading: () => <p>Loading project...</p>,
@@ -21,6 +21,7 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
         redirect("/api/auth/signin");
     }
 
+    const isAdmin = await userIsAdmin(session.user.id);
     const { project, runs } = await getProjectDashboard(params.id ?? "");
 
     return (
@@ -32,7 +33,7 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
                     <ul>
                         {runs.map((run) => (
                             <li key={run.id}>
-                                <RunView teamId={project?.teamId} run={run} />
+                                <RunView teamId={project?.teamId} run={run} isAdmin={isAdmin} />
                             </li>
                         ))}
                     </ul>

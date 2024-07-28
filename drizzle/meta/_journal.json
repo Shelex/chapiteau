@@ -15,6 +15,13 @@
       "when": 1722165237949,
       "tag": "0001_abnormal_goblin_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1722181601425,
+      "tag": "0002_youthful_tomorrow_man",
+      "breakpoints": true
     }
   ]
 }

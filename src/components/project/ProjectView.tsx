@@ -1,4 +1,6 @@
 "use client";
+import { Snippet } from "@nextui-org/snippet";
+
 import { env } from "~/env";
 import { type Project } from "~/server/db/schema";
 
@@ -16,10 +18,10 @@ export default function ProjectView({ project }: ProjectProps) {
             <p>Id: {project.id}</p>
             <p>TeamId: {project.teamId}</p>
             <p>CreatedAt: {project.createdAt.toString()}</p>
-            <h4 className="text-lg font-semibold">
-                Link for chapiteau CLI:{" "}
-                <code>{`${env.NEXT_PUBLIC_AUTH_URL}/api/teams/${project.teamId}/${project.id}`}</code>
-            </h4>
+            <p>Link for chapiteau CLI:</p>
+            <Snippet size="sm"
+                hideSymbol
+            >{`${env.NEXT_PUBLIC_AUTH_URL}/api/teams/${project.teamId}/${project.id}`}</Snippet>
         </div>
     );
 }

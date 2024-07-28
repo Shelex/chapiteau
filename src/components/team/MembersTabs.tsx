@@ -1,10 +1,11 @@
 "use client";
-import { Card, CardBody, Tab, Tabs } from "@nextui-org/react";
+import { Tab, Tabs } from "@nextui-org/react";
 import React from "react";
 
-import { type ApiKey,type Team } from "~/server/db/schema";
+import { type ApiKey, type Invite, type Team } from "~/server/db/schema";
 
 import ApiKeysTable from "../tables/ApiKeysTable";
+import InvitesTable from "../tables/InvitesTable";
 import TeamMembersTable from "../tables/MembersTable";
 
 interface TeamMembersTabsProps {
@@ -21,6 +22,7 @@ interface TeamMembersTabsProps {
         };
     }[];
     apiKeys: Omit<ApiKey, "token" | "teamId">[];
+    invites: Invite[];
     isAdmin: boolean;
 }
 
@@ -28,6 +30,7 @@ const TeamMembersTabs: React.FC<TeamMembersTabsProps> = ({
     team,
     members,
     apiKeys,
+    invites,
     isAdmin,
 }) => {
     return (
@@ -39,13 +42,7 @@ const TeamMembersTabs: React.FC<TeamMembersTabsProps> = ({
                 <ApiKeysTable team={team} apiKeys={apiKeys} isAdmin={isAdmin} />
             </Tab>
             <Tab key="invites" title="Invites">
-                <Card>
-                    <CardBody>
-                        TODO Excepteur sint occaecat cupidatat non proident,
-                        sunt in culpa qui officia deserunt mollit anim id est
-                        laborum.
-                    </CardBody>
-                </Card>
+                <InvitesTable team={team} invites={invites} isAdmin={isAdmin} />
             </Tab>
         </Tabs>
     );

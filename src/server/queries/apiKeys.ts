@@ -1,59 +1,11 @@
-"use server";
+"use server"
 import { eq } from "drizzle-orm";
 
 import { auth } from "~/auth";
 import { isUuid } from "~/lib/utils";
 
 import { db } from "../db";
-import { apiKeys, projects, teamMembers, teams } from "../db/schema";
-
-export const createTeam = async (name: string, userId: string) => {
-    return await db.transaction(async (tx) => {
-        const team = await tx
-            .insert(teams)
-            .values({
-                name,
-            })
-            .returning();
-
-        const created = team.at(0);
-
-        if (!created) {
-            return;
-        }
-
-        await tx
-            .insert(teamMembers)
-            .values({
-                teamId: created.id,
-                userId,
-                isAdmin: true,
-            })
-            .returning();
-
-        return created;
-    });
-};
-
-export const createProject = async (name: string, teamId: string) => {
-    return await db
-        .insert(projects)
-        .values({
-            name,
-            teamId,
-        })
-        .returning();
-};
-
-export const renameProject = async (projectId: string, name: string) => {
-    return await db
-        .update(projects)
-        .set({
-            name,
-        })
-        .where(eq(projects.id, projectId))
-        .returning();
-};
+import { apiKeys } from "../db/schema";
 
 interface ApiKeyInput {
     name: string;

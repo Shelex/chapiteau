@@ -15,37 +15,37 @@ import { Snippet } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
+import { env } from "~/env";
 import { type Team } from "~/server/db/schema";
-import { createApiKey } from "~/server/queries";
+import { createInvite } from "~/server/queries";
 
-interface CreateApiKeyModalProps {
+interface CreateInviteModalProps {
     team: Team;
 }
 
 interface Created {
     token?: string;
-    name?: string;
 }
 
-const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
-    const [keyName, setKeyName] = useState("");
+const CreateApiKeyModal = ({ team }: CreateInviteModalProps) => {
     const [expireAt, setExpireAt] = useState(today(getLocalTimeZone()));
+    const [limit, setLimit] = useState(1);
     const [created, setCreated] = useState<Created>({});
     const router = useRouter();
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateApiKeyServer = async () => {
-        const created = await createApiKey({
-            name: keyName,
+        const created = await createInvite({
             teamId: team.id,
             expireAt: expireAt.toDate(getLocalTimeZone()),
+            limit,
         });
-        setKeyName("");
+
+        setLimit(1);
         setExpireAt(today(getLocalTimeZone()));
         setCreated({
             token: created?.token,
-            name: created?.name,
         });
         router.refresh();
     };
@@ -53,12 +53,18 @@ const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
     return (
         <div>
             <Button color="success" onPress={onOpen}>
-                + Add Api Key for {team.name}
+                + Add Invite for &quot;{team.name}&quot;
             </Button>
             {created?.token && (
                 <>
-                    <p>Please copy your api key &quot;{created.name}&quot;:</p>
-                    <Snippet color="success" hideSymbol>{created.token}</Snippet>
+                    <p>
+                        Please share this url with members you want to invite:
+                    </p>
+                    <Snippet
+                        color="success"
+                        size="sm"
+                        hideSymbol
+                    >{`${env.NEXT_PUBLIC_AUTH_URL}/api/teams/${team.id}/invite/${created.token}`}</Snippet>
                 </>
             )}
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -66,14 +72,18 @@ const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
                     {(onClose) => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">
-                                Create New Api Key
+                                Create New Invite
                             </ModalHeader>
                             <ModalBody>
                                 <Input
+                                    label="How much users can accept invite"
                                     isRequired
-                                    value={keyName}
-                                    onChange={(e) => setKeyName(e.target.value)}
-                                    placeholder="Api Key Name"
+                                    value={limit.toString()}
+                                    onChange={(e) =>
+                                        isNaN(Number(e.target.value))
+                                            ? 0
+                                            : setLimit(Number(e.target.value))
+                                    }
                                 />
                                 <DatePicker
                                     isRequired

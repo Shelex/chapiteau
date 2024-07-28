@@ -10,9 +10,10 @@ import DeleteRunButton from "./DeleteRunButton";
 interface RunsProps {
     run: Run;
     teamId: string;
+    isAdmin: boolean;
 }
 
-export default function RunView({ teamId, run }: Readonly<RunsProps>) {
+export default function RunView({ teamId, run, isAdmin }: Readonly<RunsProps>) {
     return (
         <div className="p-4">
             <div key={run.id}>
@@ -22,7 +23,7 @@ export default function RunView({ teamId, run }: Readonly<RunsProps>) {
                         <Button>Open Report</Button>
                     </Link>
                 )}
-                <DeleteRunButton teamId={teamId} runId={run.id} />
+                {isAdmin && <DeleteRunButton teamId={teamId} runId={run.id} />}
                 <p>Run status: {run.ok ? "Passed" : "Failed"}</p>
                 <p>CreatedAt: {run.createdAt.toString()}</p>
                 <StatChart stats={run} />
