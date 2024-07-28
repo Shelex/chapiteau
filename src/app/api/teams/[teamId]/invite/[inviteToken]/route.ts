@@ -20,6 +20,8 @@ export async function GET(
 ) {
     const session = await auth();
     if (!session?.user?.id) {
+        console.log(`GEt INVITE`);
+        console.log(req.url);
         redirect("/api/auth/signin?callbackUrl=" + req.url);
     }
 
