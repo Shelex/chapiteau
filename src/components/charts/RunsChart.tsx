@@ -1,5 +1,5 @@
 "use client";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Area, AreaChart, XAxis } from "recharts";
 
 import {
     Card,
@@ -11,27 +11,29 @@ import {
 import {
     type ChartConfig,
     ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
     ChartTooltip,
     ChartTooltipContent,
 } from "~/components/ui/chart";
 import { type Run } from "~/server/db/schema";
 
 const chartConfig = {
-    passed: {
-        label: "Passed",
-        color: "hsl(var(--chart-1))",
-    },
     failed: {
         label: "Failed",
         color: "hsl(var(--chart-2))",
     },
-    skipped: {
-        label: "Skipped",
-        color: "hsl(var(--chart-3))",
-    },
     flaky: {
         label: "Flaky",
         color: "hsl(var(--chart-4))",
+    },
+    passed: {
+        label: "Passed",
+        color: "hsl(var(--chart-1))",
+    },
+    skipped: {
+        label: "Skipped",
+        color: "hsl(var(--chart-3))",
     },
 } satisfies ChartConfig;
 
@@ -40,12 +42,20 @@ interface RunsChartProps {
 }
 
 export function RunsChart({ runs }: RunsChartProps) {
+    const getPercentage = (value: number, total: number) =>
+        Math.round((value / total) * 100);
+
     const chartData = runs.map((run) => ({
-        date: run.createdAt,
-        passed: run.expected,
-        failed: run.unexpected,
-        skipped: run.skipped,
-        flaky: run.flaky,
+        date: run.createdAt.getTime(),
+        passed: getPercentage(run.expected, run.total),
+        passedCount: run.expected,
+        failed: getPercentage(run.unexpected, run.total),
+        failedCount: run.unexpected,
+        skipped: getPercentage(run.skipped, run.total),
+        skippedCount: run.skipped,
+        flaky: getPercentage(run.flaky, run.total),
+        flakyCount: run.flaky,
+        total: run.total,
     }));
 
     return (
@@ -56,38 +66,100 @@ export function RunsChart({ runs }: RunsChartProps) {
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig}>
+                    {/* <BarChart accessibilityLayer data={chartData.reverse()}> */}
                     <AreaChart
                         accessibilityLayer
                         data={chartData.reverse()}
                         margin={{
                             left: 12,
                             right: 12,
-                            top: 12,
                         }}
-                        stackOffset="expand"
                     >
-                        <CartesianGrid vertical={false} />
                         <XAxis
                             dataKey="date"
                             tickLine={false}
                             axisLine={false}
-                            tickMargin={8}
+                            tickMargin={10}
+                            tickFormatter={(value: number) => {
+                                return new Date(value).toLocaleDateString(
+                                    undefined,
+                                    {
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric",
+                                    }
+                                );
+                            }}
                         />
                         <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent indicator="line" />}
+                            content={
+                                <ChartTooltipContent
+                                    hideLabel
+                                    className="w-[180px]"
+                                    formatter={(value, name, item, index) => (
+                                        <>
+                                            <div
+                                                className="h-2.5 w-2.5 shrink-0 rounded-[2px] bg-[--color-bg]"
+                                                style={
+                                                    {
+                                                        "--color-bg": `var(--color-${name})`,
+                                                    } as React.CSSProperties
+                                                }
+                                            />
+                                            {chartConfig[
+                                                name as keyof typeof chartConfig
+                                            ]?.label || name}
+                                            <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                                                {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
+                                                {item.payload[`${name}Count`]} (
+                                                {value}%)
+                                            </div>
+                                            {/* Add this after the last item */}
+                                            {index === 3 && (
+                                                <>
+                                                    <div className="mt-1.5 flex basis-full items-center border-t pt-1.5 text-xs font-medium text-foreground">
+                                                        Total
+                                                        <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                                                            {
+                                                                (
+                                                                    item.payload as Run
+                                                                ).total
+                                                            }
+                                                            <span className="font-normal text-muted-foreground">
+                                                                tests
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-1.5 flex basis-full items-center border-t pt-1.5 text-xs font-medium text-foreground">
+                                                        Created At
+                                                        <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                                                            {new Date(
+                                                                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+                                                                item.payload.date
+                                                            ).toLocaleString()}
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                />
+                            }
+                            cursor={true}
+                            defaultIndex={1}
                         />
                         {Object.keys(chartConfig).map((key) => (
                             <Area
                                 key={key}
                                 dataKey={key}
-                                type="natural"
-                                fill={`var(--color-${key})`}
-                                fillOpacity={0.4}
-                                stroke={`var(--color-${key})`}
                                 stackId="a"
+                                fill={`var(--color-${key})`}
+                                fillOpacity={0.7}
+                                stroke={`var(--color-${key})`}
                             />
                         ))}
+                        <ChartLegend content={<ChartLegendContent />} />
+                        {/* </BarChart> */}
                     </AreaChart>
                 </ChartContainer>
             </CardContent>
