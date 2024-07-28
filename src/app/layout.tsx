@@ -6,7 +6,7 @@ import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 
 import { auth } from "~/auth";
-import Header from "~/components/molecules/Header";
+import Header from "~/components/layout/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
