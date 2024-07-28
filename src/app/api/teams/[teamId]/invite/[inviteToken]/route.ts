@@ -2,8 +2,7 @@ import { redirect } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { auth } from "~/auth";
-import { userIsTeamMember } from "~/server/queries";
-import { acceptInvite } from "~/server/queries";
+import { acceptInvite, userIsTeamMember } from "~/server/queries";
 
 interface InviteParams {
     teamId: string;
@@ -20,16 +19,20 @@ export async function GET(
 ) {
     const session = await auth();
     if (!session?.user?.id) {
-        console.log(`GEt INVITE`);
-        console.log(`req.url=${req.url}`);
-        console.log(`req.nextUrl.href=${req.nextUrl.href}`);
-        console.log(`req.nextUrl.host=${req.nextUrl.host}`);
-        console.log(`req.nextUrl.hostname=${req.nextUrl.hostname}`);
-        console.log(`req.headers.get('host')=${req.headers.get("host")}`);
-        console.log(`req.referrer=${req.referrer}`)
-        console.log(`req.nextUrl.basePath=${req.nextUrl.basePath}`)
-        console.log(`req.nextUrl.origin=${req.nextUrl.origin}`)
-        redirect("/api/auth/signin?callbackUrl=" + req.url);
+        /**
+         * You are not able to just redirect a user back to the host
+         * https://github.com/vercel/next.js/issues/37536#issuecomment-1160548793
+         * Next.js hides real host for security reasons
+         * when deployed outside of vercel (surprise-surprise)
+         */
+        const realHost = req.headers.get("host") ?? "";
+        const instanceHost = "localhost:80";
+
+        const callbackUrl = realHost
+            ? req.url.replace(instanceHost, realHost)
+            : req.url;
+
+        redirect(`/api/auth/signin?callbackUrl=${callbackUrl}`);
     }
 
     const { teamId, inviteToken } = params;
