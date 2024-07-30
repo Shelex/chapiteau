@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@nextui-org/button";
-import { Chip } from "@nextui-org/react";
+import { Accordion, AccordionItem, Chip } from "@nextui-org/react";
 import Link from "next/link";
 
 import { type Run } from "~/server/db/schema";
@@ -72,6 +72,24 @@ export default function RunView({ teamId, run, isAdmin }: Readonly<RunsProps>) {
                     </div>
                 </div>
             </div>
+            {run.reportUrl && (
+                <Accordion
+                    className="mt-5 bg-primary-100"
+                    variant="bordered"
+                >
+                    <AccordionItem
+                        key="1"
+                        aria-label="Report Preview"
+                        title="Report Preview"
+                        className="justify-center"
+                    >
+                        <iframe
+                            className="w-[600px] h-[400px] rounded-lg"
+                            src={run.reportUrl}
+                        />
+                    </AccordionItem>
+                </Accordion>
+            )}
         </div>
     );
 }
