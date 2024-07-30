@@ -9,29 +9,31 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 import { createProject } from "~/server/queries";
 
 interface CreateProjectModalProps {
     teamId: string;
+    onCreated?: (teamId: string) => void;
 }
 
-const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ teamId }) => {
-    const router = useRouter();
+const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
+    teamId,
+    onCreated,
+}) => {
     const [projectName, setProjectName] = useState("");
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateProject = async () => {
         await createProject(projectName, teamId);
         setProjectName("");
-        router.refresh();
+        onCreated?.(teamId);
     };
 
     return (
         <div>
-            <Button color="success" onPress={onOpen}>
+            <Button className="w-full" color="success" onPress={onOpen}>
                 + Add Project
             </Button>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>

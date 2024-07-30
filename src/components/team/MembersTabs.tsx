@@ -34,17 +34,31 @@ const TeamMembersTabs: React.FC<TeamMembersTabsProps> = ({
     isAdmin,
 }) => {
     return (
-        <Tabs aria-label="Options">
-            <Tab key="members" title="Members">
-                <TeamMembersTable members={members} />
-            </Tab>
-            <Tab key="api-keys" title="Api Keys">
-                <ApiKeysTable team={team} apiKeys={apiKeys} isAdmin={isAdmin} />
-            </Tab>
-            <Tab key="invites" title="Invites">
-                <InvitesTable team={team} invites={invites} isAdmin={isAdmin} />
-            </Tab>
-        </Tabs>
+        team && (
+            <Tabs aria-label="Options">
+                <Tab key="members" title="Members">
+                    <TeamMembersTable
+                        team={team}
+                        members={members}
+                        isAdmin={isAdmin}
+                    />
+                </Tab>
+                <Tab key="api-keys" title="Api Keys">
+                    <ApiKeysTable
+                        team={team}
+                        apiKeys={apiKeys}
+                        isAdmin={isAdmin}
+                    />
+                </Tab>
+                <Tab key="invites" title="Invites">
+                    <InvitesTable
+                        team={team}
+                        invites={invites}
+                        isAdmin={isAdmin}
+                    />
+                </Tab>
+            </Tabs>
+        )
     );
 };
 

@@ -66,7 +66,6 @@ export function RunsChart({ runs }: RunsChartProps) {
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig}>
-                    {/* <BarChart accessibilityLayer data={chartData.reverse()}> */}
                     <AreaChart
                         accessibilityLayer
                         data={chartData.reverse()}
@@ -146,7 +145,6 @@ export function RunsChart({ runs }: RunsChartProps) {
                                 />
                             }
                             cursor={true}
-                            defaultIndex={1}
                         />
                         {Object.keys(chartConfig).map((key) => (
                             <Area
@@ -159,7 +157,6 @@ export function RunsChart({ runs }: RunsChartProps) {
                             />
                         ))}
                         <ChartLegend content={<ChartLegendContent />} />
-                        {/* </BarChart> */}
                     </AreaChart>
                 </ChartContainer>
             </CardContent>

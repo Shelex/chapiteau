@@ -1,12 +1,8 @@
-import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 
 import { auth } from "~/auth";
+import Team from '~/components/team/ManageTeam'
 import { getTeam, userIsAdmin } from "~/server/queries";
-const Team = dynamic(() => import("~/components/team/ManageTeam"), {
-    ssr: false,
-    loading: () => <p>Loading team members...</p>,
-});
 
 interface TeamProps {
     params: { id: string };
@@ -16,7 +12,8 @@ export default async function TeamPage({ params }: Readonly<TeamProps>) {
     const session = await auth();
 
     if (!session?.user?.id) {
-        redirect("/api/auth/signin");
+        const callbackUrl = `/team/${params.id}`;
+        redirect(`/api/auth/signin?callbackUrl=${callbackUrl}`);
     }
 
     const team = await getTeam(params.id);
@@ -28,8 +25,8 @@ export default async function TeamPage({ params }: Readonly<TeamProps>) {
     const isAdmin = await userIsAdmin(session.user.id, team.id);
 
     return (
-        <main className="text-center mt-10">
-            <Team id={team.id} name={team.name} isAdmin={!isAdmin} />
-        </main>
+        <div className="text-center">
+            <Team team={team} isAdmin={!isAdmin} />
+        </div>
     );
 }

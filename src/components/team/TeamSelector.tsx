@@ -1,38 +1,35 @@
 "use client";
 import { type SharedSelection } from "@nextui-org/react";
 import { Select, SelectItem } from "@nextui-org/select";
-import { usePathname, useRouter,useSearchParams } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { type Team } from "~/server/db/schema";
 
 interface TeamSelectorProps {
-    teams: Team[];
-    param: string;
     current?: Team["id"];
+    onChangedTeam?: (teamId: string) => void;
 }
 
-const TeamSelector = ({ teams = [], current, param }: TeamSelectorProps) => {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+const TeamSelector = ({ current, onChangedTeam }: TeamSelectorProps) => {
+    const [teams, setTeams] = useState<Team[]>([]);
 
-    const selectedItemId = current ?? searchParams.get(param);
+    useEffect(() => {
+        const fetchTeams = () =>
+            fetch(`/api/teams`, { method: "GET" })
+                .then((res) => res.json() as Promise<Team[]>)
+                .then((teams) => {
+                    if (!current) {
+                        onChangedTeam?.(teams?.at(0)?.id ?? "");
+                    }
+                    setTeams(teams);
+                });
+
+        void fetchTeams();
+    }, [current, onChangedTeam]);
 
     const onSelect = (selection: SharedSelection) => {
-        const current = new URLSearchParams(Array.from(searchParams.entries()));
         const value = selection.currentKey?.trim();
-
-        if (!value) {
-            current.delete(param);
-        } else {
-            current.set(param, value);
-        }
-
-        const search = current.toString();
-        const query = search ? `?${search}` : "";
-
-        void router.push(`${pathname}${query}`);
+        onChangedTeam?.(value ?? "");
     };
 
     return (
@@ -40,8 +37,13 @@ const TeamSelector = ({ teams = [], current, param }: TeamSelectorProps) => {
             <Select
                 label="Select a team"
                 onSelectionChange={(selection) => onSelect(selection)}
-                selectedKeys={[selectedItemId ?? ""]}
-                unselectable="off"
+                selectedKeys={[current ?? ""]}
+                fullWidth
+                disallowEmptySelection
+                classNames={{
+                    trigger: "bg-primary-50",
+                    listboxWrapper: "min-h-96",
+                }}
             >
                 {teams.map((team) => (
                     <SelectItem key={team.id}>{team.name}</SelectItem>

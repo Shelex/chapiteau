@@ -1,28 +1,24 @@
 import React from "react";
 
 import TeamMembersTabs from "~/components/team/MembersTabs";
-import {
-    getApiKeys,
-    getInvites,
-    getTeam,
-    getTeamMembers,
-} from "~/server/queries";
+import { type Team } from "~/server/db/schema";
+import { getApiKeys, getInvites, getTeamMembers } from "~/server/queries";
 
 interface ManageTeamProps {
-    id: string;
-    name: string;
+    team: Team;
     isAdmin: boolean;
 }
 
-const ManageTeam: React.FC<ManageTeamProps> = async ({ id, name, isAdmin }) => {
-    const team = await getTeam(id);
-    const members = await getTeamMembers(id);
-    const apiKeys = await getApiKeys(id);
-    const invites = await getInvites(id);
+const ManageTeam: React.FC<ManageTeamProps> = async ({ team, isAdmin }) => {
+    const [members, apiKeys, invites] = await Promise.all([
+        getTeamMembers(team.id),
+        getApiKeys(team.id),
+        getInvites(team.id),
+    ]);
 
     return (
         <div>
-            <h1>Manage Team {name}</h1>
+            <h1>Team &quot;{team.name}&quot;</h1>
             <TeamMembersTabs
                 team={team}
                 members={members}

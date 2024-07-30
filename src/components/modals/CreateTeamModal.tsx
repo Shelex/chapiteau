@@ -9,7 +9,6 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 
 import { type User } from "~/server/db/users";
@@ -17,30 +16,26 @@ import { createTeam } from "~/server/queries";
 
 interface CreateTeamModalProps {
     userId: User["id"];
+    onCreated?: (teamId: string) => void;
 }
 
-const CreateTeamModal = ({ userId }: CreateTeamModalProps) => {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+const CreateTeamModal = ({ userId, onCreated }: CreateTeamModalProps) => {
     const [teamName, setTeamName] = useState("");
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateTeam = async () => {
         const created = await createTeam(teamName, userId);
+        if (!created) {
+            return;
+        }
+        onCreated?.(created.id);
         setTeamName("");
-        router.refresh();
-        const current = new URLSearchParams(Array.from(searchParams.entries()));
-        created && current.set("selectedTeam", created?.id ?? "");
-        const search = current.toString();
-        const query = search ? `?${search}` : "";
-        void router.push(`${pathname}${query}`);
     };
 
     return (
         <div>
-            <Button color="success" onPress={onOpen}>
+            <Button className="w-full" color="success" onPress={onOpen}>
                 + Add Team
             </Button>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>

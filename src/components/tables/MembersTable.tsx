@@ -10,7 +10,11 @@ import {
 } from "@nextui-org/react";
 import React from "react";
 
+import { type Team } from "~/server/db/schema";
+
 interface MembersTableProps {
+    team: Team;
+    isAdmin: boolean;
     members: {
         user: {
             id: string;
@@ -24,7 +28,11 @@ interface MembersTableProps {
     }[];
 }
 
-const TeamMembersTable: React.FC<MembersTableProps> = ({ members }) => {
+const TeamMembersTable: React.FC<MembersTableProps> = ({
+    team,
+    members,
+    isAdmin,
+}) => {
     return (
         <div>
             <Table title="Members" isStriped>

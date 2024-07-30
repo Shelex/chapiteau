@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@nextui-org/button";
+import { Chip } from "@nextui-org/react";
 import Link from "next/link";
 
 import { type Run } from "~/server/db/schema";
@@ -13,27 +14,63 @@ interface RunsProps {
     isAdmin: boolean;
 }
 
+const parseMilliseconds = (ms: number) => {
+    const seconds = Math.floor(ms / 1000);
+    const leftMs = ms % 1000;
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+
+    if (hours > 0) {
+        return `${hours}h ${minutes % 60}m ${seconds % 60}s ${leftMs}ms`;
+    }
+
+    if (minutes > 0) {
+        return `${minutes}m ${seconds % 60}s ${leftMs}ms`;
+    }
+
+    if (seconds > 0) {
+        return `${seconds}s ${leftMs}ms`;
+    }
+
+    return `${leftMs}ms`;
+};
+
 export default function RunView({ teamId, run, isAdmin }: Readonly<RunsProps>) {
     return (
-        <div className="p-4">
+        <div className="w-full min-h-max">
             <div key={run.id}>
                 <h2 className="text-lg font-semibold">{run.id}</h2>
-                {run.reportUrl && (
-                    <Link href={run.reportUrl}>
-                        <Button>Open Report</Button>
-                    </Link>
-                )}
-                {isAdmin && <DeleteRunButton teamId={teamId} runId={run.id} />}
-                <p>Run status: {run.ok ? "Passed" : "Failed"}</p>
-                <p>CreatedAt: {run.createdAt.toString()}</p>
-                <StatChart stats={run} />
-                <p>Workers: {run.workers}</p>
-                <p>StartedAt: {run.startedAt.toString()}</p>
-                <p>FinishedAt: {run.finishedAt.toString()}</p>
-                <p>Duration: {run.duration} ms</p>
-                <p>CreatedBy: {run.createdBy}</p>
-                {run.buildName && <p>BuildName: {run.buildName}</p>}
-                {run.buildUrl && <p>BuildUrl: {run.buildUrl}</p>}
+                <div className="flex flex-row justify-between p-2">
+                    {run.reportUrl && (
+                        <Link href={run.reportUrl}>
+                            <Button>Open Report</Button>
+                        </Link>
+                    )}
+                    {isAdmin && (
+                        <DeleteRunButton teamId={teamId} runId={run.id} />
+                    )}
+                </div>
+                <div className="flex flex-row justify-between p-1">
+                    <div className="w-full h-full">
+                        <StatChart stats={run} />
+                    </div>
+                    <div className="w-1/2 h-full text-left pl-2 mt-2">
+                        <div>
+                            Status:{" "}
+                            <Chip color={run.ok ? "success" : "danger"}>
+                                {run.ok ? "Passed" : "Failed"}
+                            </Chip>
+                        </div>
+                        <p>Workers: {run.workers}</p>
+                        <p>StartedAt: {run.startedAt.toLocaleString()}</p>
+                        <p>FinishedAt: {run.finishedAt.toLocaleString()}</p>
+                        <p>CreatedAt: {run.createdAt.toLocaleString()}</p>
+                        <p>Duration: {parseMilliseconds(run.duration)}</p>
+                        <p>CreatedBy: {run.createdBy}</p>
+                        {run.buildName && <p>BuildName: {run.buildName}</p>}
+                        {run.buildUrl && <p>BuildUrl: {run.buildUrl}</p>}
+                    </div>
+                </div>
             </div>
         </div>
     );

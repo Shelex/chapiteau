@@ -1,24 +1,46 @@
-import { Button } from "@nextui-org/button";
+"use client";
+import { Link as LinkComponent, Listbox, ListboxItem } from "@nextui-org/react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-import { type Team } from "~/server/db/schema";
-import { getProjects } from "~/server/queries";
+import { type Project, type Team } from "~/server/db/schema";
 
 interface ProjectListProps {
     teamId: Team["id"];
+    refreshId: string;
 }
 
-const ProjectList = async ({ teamId }: ProjectListProps) => {
-    const projects = await getProjects(teamId);
+const ProjectList = ({ teamId, refreshId }: ProjectListProps) => {
+    const [projects, setProjects] = useState<Project[]>([]);
 
-    return projects.map((project) => (
-        <p key={project.id}>
-            <Link href={`/project/${project.id}`} legacyBehavior passHref>
-                <Button>{project.name}</Button>
-            </Link>
-        </p>
-    ));
+    useEffect(() => {
+        const fetchProjects = () =>
+            fetch(`/api/teams/${teamId}/projects`, { method: "GET" })
+                .then((res) => res.json() as Promise<Project[]>)
+                .then((projects) => setProjects(projects));
+
+        teamId && void fetchProjects();
+    }, [teamId, refreshId]);
+
+    return (
+        <Listbox emptyContent="No projects.">
+            {(projects ?? []).map((project) => (
+                <ListboxItem key={project.id}>
+                    <Link
+                        key={project.id}
+                        href={`/project/${project.id}`}
+                        passHref
+                        legacyBehavior
+                        prefetch
+                    >
+                        <LinkComponent style={{ width: "100%" }}>
+                            {project.name}
+                        </LinkComponent>
+                    </Link>
+                </ListboxItem>
+            ))}
+        </Listbox>
+    );
 };
 
 export default ProjectList;

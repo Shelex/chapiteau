@@ -13,13 +13,18 @@ export default function ProjectView({ project }: ProjectProps) {
         return null;
     }
     return (
-        <div className="p-4">
-            <h2 className="text-lg font-semibold">{project.name}</h2>
-            <p>Id: {project.id}</p>
-            <p>TeamId: {project.teamId}</p>
-            <p>CreatedAt: {project.createdAt.toString()}</p>
+        <div className="p-4 text-left">
+            <h2 className="text-lg font-semibold">
+                Project &quot;{project.name}&quot;
+            </h2>
+            <p>CreatedAt: {project.createdAt.toLocaleString()}</p>
             <p>Link for chapiteau CLI:</p>
-            <Snippet size="sm"
+            <Snippet
+                size="sm"
+                style={{
+                    maxWidth: "100%",
+                    overflow: "auto",
+                }}
                 hideSymbol
             >{`${env.NEXT_PUBLIC_AUTH_URL}/api/teams/${project.teamId}/${project.id}`}</Snippet>
         </div>

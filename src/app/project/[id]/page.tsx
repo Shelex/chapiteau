@@ -18,31 +18,33 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
     const session = await auth();
 
     if (!session?.user?.id) {
-        redirect("/api/auth/signin");
+        redirect(`/api/auth/signin?callbackUrl=/project/${params.id}`);
     }
 
     const { project, runs } = await getProjectDashboard(params.id ?? "");
     const isAdmin = await userIsAdmin(session.user.id, project?.teamId);
 
     return (
-        <main className="text-center mt-10">
+        <div className="text-center">
             {project && <ProjectView project={project} />}
             {project?.teamId && (
-                <div className="mt-10">
+                <div>
                     {runs?.length > 1 && <RunsChart runs={runs} />}
                     <ul>
-                        {runs.map((run) => (
-                            <li key={run.id}>
-                                <RunView
-                                    teamId={project?.teamId}
-                                    run={run}
-                                    isAdmin={isAdmin}
-                                />
-                            </li>
-                        ))}
+                        <div className="flex flex-row justify-between flex-wrap">
+                            {runs.map((run) => (
+                                <li key={run.id} className="w-1/2 min-w-max my-4 p-4">
+                                    <RunView
+                                        teamId={project?.teamId}
+                                        run={run}
+                                        isAdmin={isAdmin}
+                                    />
+                                </li>
+                            ))}
+                        </div>
                     </ul>
                 </div>
             )}
-        </main>
+        </div>
     );
 }
