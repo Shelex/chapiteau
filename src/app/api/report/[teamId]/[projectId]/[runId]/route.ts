@@ -171,6 +171,7 @@ function getContentType(filePath: string) {
         ".png": "image/png",
         ".jpg": "image/jpeg",
         ".gif": "image/gif",
+        ".mp4": "video/mp4",
     };
     return types?.[ext] ?? "application/octet-stream";
 }

@@ -197,8 +197,10 @@ export const deleteRun = async (runId: string, teamId: string) => {
         await tx.delete(tests).where(eq(tests.runId, runId));
         await tx.delete(files).where(eq(files.runId, runId));
         await tx.delete(runs).where(eq(runs.id, runId));
-        if (run.reportUrl?.includes(env.AUTH_URL)) {
-            const path = `/reports/${teamId}/${run.projectId}/${runId}`;
+        if (run.reportUrl?.includes(env.NEXT_PUBLIC_AUTH_URL)) {
+            const path = `${process.cwd()}/reports/${teamId}/${
+                run.projectId
+            }/${runId}`;
             fs.existsSync(path) &&
                 fs.rmdirSync(path, {
                     recursive: true,
