@@ -19,7 +19,11 @@ const TeamSelector = ({ current, onChangedTeam }: TeamSelectorProps) => {
                 .then((res) => res.json() as Promise<Team[]>)
                 .then((teams) => {
                     if (!current) {
-                        onChangedTeam?.(teams?.at(0)?.id ?? "");
+                        onChangedTeam?.(
+                            localStorage.getItem("selectedTeam") ??
+                                teams?.at(0)?.id ??
+                                ""
+                        );
                     }
                     setTeams(teams);
                 });
@@ -29,6 +33,7 @@ const TeamSelector = ({ current, onChangedTeam }: TeamSelectorProps) => {
 
     const onSelect = (selection: SharedSelection) => {
         const value = selection.currentKey?.trim();
+        localStorage.setItem("selectedTeam", value ?? "");
         onChangedTeam?.(value ?? "");
     };
 

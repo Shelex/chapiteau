@@ -14,7 +14,9 @@ export default function Sidebar({
 }: Readonly<{
     session: Session | null;
 }>) {
-    const [currentTeam, setCurrentTeam] = useState("");
+    const [currentTeam, setCurrentTeam] = useState(
+        localStorage.getItem("selectedTeam") ?? ""
+    );
     const [refreshId, setRefreshId] = useState(crypto.randomUUID());
 
     const onChangedTeam = (teamId: string) => {
