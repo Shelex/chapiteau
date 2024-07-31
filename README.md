@@ -1,6 +1,8 @@
 # Chapiteau
 
-<img src="./public/logo.jpg" width="250" height="250">
+<p align="center">
+  <img src="./public/logo.png" alt="Logo" width="250" height="250" style="border-radius: 50%; background: white; padding: 20px;">
+</p>
 
 Welcome to the chapiteau - a place where you will observe your playwright test results with blows and whistles to please your manager!
 

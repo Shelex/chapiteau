@@ -1,12 +1,5 @@
-import {
-    Checkbox,
-    Chip,
-    Divider,
-    Link as LinkComponent,
-    Snippet,
-} from "@nextui-org/react";
+import { Checkbox, Chip, Divider, Snippet } from "@nextui-org/react";
 import { DotIcon, PartyPopperIcon } from "lucide-react";
-import Link from "next/link";
 
 interface HomeProps {
     searchParams?: { selectedTeam?: string };
@@ -45,12 +38,12 @@ export default function Home({ searchParams }: Readonly<HomeProps>) {
                     <div className="flex flex-row mt-5 mb-5">
                         <DotIcon />
                         install&nbsp;
-                        <Link
+                        <a
                             href="https://www.npmjs.com/package/chapiteau-cli"
                             target="_blank"
                         >
-                            <LinkComponent>chapiteau-cli</LinkComponent>
-                        </Link>
+                            chapiteau-cli
+                        </a>
                         &nbsp;globally or just use via npx
                     </div>
                     <div className="flex flex-row mt-5">

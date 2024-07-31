@@ -40,5 +40,5 @@
         "types/*",
         "next.config.js"
 , "src/env.js"    ],
-    "exclude": ["node_modules", "postcss.config.mjs"]
+    "exclude": ["node_modules", "postcss.config.mjs", "reports"]
 }

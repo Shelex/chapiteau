@@ -10,7 +10,7 @@ export function MainNav() {
         <CustomLink href="/">
             <Button variant="bordered">
                 <Image
-                    src="/logo.jpg"
+                    src="/logo.png"
                     alt="Home"
                     width="42"
                     height="42"
