@@ -4,11 +4,11 @@
   <img src="./public/logo-rounded.png" alt="Logo" width="300" height="300">
 </p>
 
-Welcome to the chapiteau - a place where you will observe your playwright test results with blows and whistles to please your manager!
+Welcome to the chapiteau :circus_tent: - a place where you will observe your playwright test results :performing_arts: with bells :bell: and whistles :tada: to please your manager :chart_with_upwards_trend: :bar_chart:!
 
 ## Demo
 
-There is [invite link](https://chapiteau.shelex.dev/api/teams/a6d130d8-f180-460c-ba0e-5419ddddb0cb/invite/df96f2c2-1b84-4d2e-89a1-3da0252151c1) for a demo team with some randomized data just to have an idea how it works (or not ¯\_(ツ)\_/¯). Only sign in via github is required.
+There is [invite link](https://chapiteau.shelex.dev/api/teams/a6d130d8-f180-460c-ba0e-5419ddddb0cb/invite/df96f2c2-1b84-4d2e-89a1-3da0252151c1) for a demo team with some randomized data just to have an idea how it works (or not ). Only sign in via github is required.
 
 ## Getting Started
 
@@ -40,7 +40,7 @@ There is [invite link](https://chapiteau.shelex.dev/api/teams/a6d130d8-f180-460c
         npx chapiteau-cli upload --path "./playwright-report/index.html" --url "https://chapiteau.shelex.dev/api/teams/870ddb60-b3ac-4bea-8f83-94c2d6577650/5d2f0dcb-4c4c-49f5-b14d-28b689c5fd54" --auth "fb8c36be-5923-4bae-bcc3-3a16090c9561" --report-url "https://shelex.github.io/pw-tests-with-gh-pages/5"
     ```
 
--   let the clowns and acrobats do the damn job under the hood
+-   let the clowns :juggling_person: and acrobats :cartwheeling: do the damn job under the hood
 
 ## How to invite team members
 
