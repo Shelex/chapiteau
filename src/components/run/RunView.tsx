@@ -39,7 +39,7 @@ export default function RunView({ teamId, run, isAdmin }: Readonly<RunsProps>) {
     return (
         <div className="w-full min-h-max">
             <div key={run.id}>
-                <h2 className="text-lg font-semibold">{run.id}</h2>
+                <h2 className="text-lg font-semibold">Run #{run.numericId}</h2>
                 <div className="flex flex-row justify-between p-2">
                     {run.reportUrl && (
                         <Link href={run.reportUrl}>
@@ -85,7 +85,7 @@ export default function RunView({ teamId, run, isAdmin }: Readonly<RunsProps>) {
                     >
                         <iframe
                             title={`"Report Preview ${run.id}"`}
-                            className="w-[600px] h-[400px] rounded-lg"
+                            className="w-full h-[400px] rounded-lg pb-1"
                             src={run.reportUrl}
                         />
                     </AccordionItem>

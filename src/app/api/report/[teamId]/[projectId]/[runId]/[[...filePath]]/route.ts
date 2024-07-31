@@ -45,7 +45,7 @@ const addNav = (
     fqdn: string,
     options: ReportParams & Links
 ) => {
-    const reportBaseUrl = `${fqdn}/reports/${options.teamId}/${options.projectId}`;
+    const reportBaseUrl = `${fqdn}/api/report/${options.teamId}/${options.projectId}`;
     const buttons = [
         {
             id: "back_button",
@@ -129,7 +129,7 @@ export async function GET(
     try {
         await fs.access(targetPath);
         const content = await fs.readFile(targetPath, "utf-8");
-        const links = (await getRunNeighbors(runId)) ?? {};
+        const links = (await getRunNeighbors(Number(runId))) ?? {};
         return new Response(
             addNav(content, env.AUTH_URL, {
                 ...params,

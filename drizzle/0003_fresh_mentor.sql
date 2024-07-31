@@ -1,0 +1,1 @@
+ALTER TABLE "runs" ADD COLUMN "numeric_id" integer NOT NULL;

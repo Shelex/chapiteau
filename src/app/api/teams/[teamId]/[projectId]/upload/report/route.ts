@@ -70,7 +70,7 @@ export async function POST(
         "reports",
         params.teamId,
         params.projectId,
-        createdRun.id
+        `${createdRun.numericId}`
     );
 
     console.log(

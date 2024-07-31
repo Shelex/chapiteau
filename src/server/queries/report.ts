@@ -19,6 +19,17 @@ interface SaveReportInput {
     saveReportLocally?: boolean;
 }
 
+const createRunNumericId = async (projectId: string): Promise<number> => {
+    const [run] = await db
+        .select({ numericId: runs.numericId })
+        .from(runs)
+        .where(eq(runs.projectId, projectId))
+        .orderBy(desc(runs.numericId))
+        .limit(1);
+
+    return run ? run.numericId + 1 : 1;
+};
+
 export const saveReport = async (input: SaveReportInput) => {
     return await db.transaction(async (tx) => {
         const { createdBy, teamId, projectId, report, saveReportLocally } =
@@ -26,18 +37,21 @@ export const saveReport = async (input: SaveReportInput) => {
 
         const runId = crypto.randomUUID();
 
-        const reportUrl = saveReportLocally
-            ? `${env.AUTH_URL}/api/report/${teamId}/${projectId}/${runId}/index.html`
-            : report.reportUrl;
-
         const durationMilliseconds = Math.round(report.duration);
         const finishedAt = report.startTime + durationMilliseconds;
+
+        const numericId = await createRunNumericId(projectId);
+
+        const reportUrl = saveReportLocally
+            ? `${env.AUTH_URL}/api/report/${teamId}/${projectId}/${numericId}/index.html`
+            : report.reportUrl;
 
         const run = await tx
             .insert(runs)
             .values({
                 id: runId,
                 projectId,
+                numericId,
                 workers: report?.metadata?.actualWorkers ?? 1,
                 startedAt: new Date(report.startTime),
                 finishedAt: new Date(finishedAt),
@@ -134,8 +148,11 @@ export const saveReport = async (input: SaveReportInput) => {
     });
 };
 
-export const getRunNeighbors = async (runId: string) => {
-    const found = await db.select().from(runs).where(eq(runs.id, runId));
+export const getRunNeighbors = async (numericRunId: number) => {
+    const found = await db
+        .select()
+        .from(runs)
+        .where(eq(runs.numericId, numericRunId));
 
     const [run] = found;
 
@@ -169,8 +186,14 @@ export const getRunNeighbors = async (runId: string) => {
         .limit(1);
 
     return {
-        nextRunId: !!nextRun && nextRun.id !== run.id && nextRun.id,
-        prevRunId: !!prevRun && prevRun.id !== run.id && prevRun.id,
+        nextRunId:
+            !!nextRun &&
+            nextRun.numericId !== run.numericId &&
+            `${nextRun.numericId}`,
+        prevRunId:
+            !!prevRun &&
+            prevRun.numericId !== run.numericId &&
+            `${prevRun.numericId}`,
     };
 };
 

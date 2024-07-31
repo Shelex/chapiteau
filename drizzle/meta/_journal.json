@@ -22,6 +22,13 @@
       "when": 1722181601425,
       "tag": "0002_youthful_tomorrow_man",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1722411768986,
+      "tag": "0003_fresh_mentor",
+      "breakpoints": true
     }
   ]
 }

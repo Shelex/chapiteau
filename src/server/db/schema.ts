@@ -102,6 +102,7 @@ export const runs = pgTable("runs", {
     projectId: text("project_id")
         .references(() => projects.id)
         .notNull(),
+    numericId: integer("numeric_id").notNull(),
     workers: smallint("workers").notNull().default(0),
     startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
     finishedAt: timestamp("finished_at", { withTimezone: true }).notNull(),
