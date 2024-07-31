@@ -17,14 +17,17 @@ const ProjectList = ({ teamId, refreshId }: ProjectListProps) => {
         const fetchProjects = () =>
             fetch(`/api/teams/${teamId}/projects`, { method: "GET" })
                 .then((res) => res.json() as Promise<Project[]>)
-                .then((projects) => setProjects(projects));
+                .then(
+                    (projects) =>
+                        Array.isArray(projects) && setProjects(projects)
+                );
 
         teamId && void fetchProjects();
     }, [teamId, refreshId]);
 
     return (
         <Listbox emptyContent="No projects.">
-            {(projects ?? []).map((project) => (
+            {projects.map((project) => (
                 <ListboxItem key={project.id}>
                     <Link
                         key={project.id}

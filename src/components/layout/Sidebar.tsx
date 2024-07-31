@@ -17,8 +17,10 @@ export default function Sidebar({
     const [currentTeam, setCurrentTeam] = useState("");
 
     useEffect(() => {
-        const stored = window.localStorage.getItem("selectedTeam");
-        setCurrentTeam(stored ?? "");
+        if (!currentTeam) {
+            const stored = window.localStorage.getItem("selectedTeam");
+            setCurrentTeam(stored ?? "");
+        }
     }, [currentTeam]);
 
     const [refreshId, setRefreshId] = useState(crypto.randomUUID());
