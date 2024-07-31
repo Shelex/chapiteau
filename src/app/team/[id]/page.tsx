@@ -26,7 +26,7 @@ export default async function TeamPage({ params }: Readonly<TeamProps>) {
 
     return (
         <div className="text-center">
-            <Team team={team} isAdmin={!isAdmin} />
+            <Team team={team} isAdmin={isAdmin} />
         </div>
     );
 }

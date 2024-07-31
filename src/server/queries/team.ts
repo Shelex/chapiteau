@@ -1,10 +1,10 @@
 "use server";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "../db";
 import { type Team, teamMembers, teams } from "../db/schema";
-import { users } from "../db/users";
+import { type User, users } from "../db/users";
 
 export const createTeam = async (name: string, userId: string) => {
     return await db.transaction(async (tx) => {
@@ -49,5 +49,22 @@ export const getTeamMembers = async (teamId: Team["id"]) => {
         .select()
         .from(member)
         .where(eq(member.teamId, teamId))
-        .leftJoin(users, eq(member.userId, users.id));
+        .leftJoin(users, eq(member.userId, users.id))
+        .orderBy(desc(member.createdAt));
+};
+
+export const changeMemberAdminStatus = async (
+    teamId: Team["id"],
+    userId: User["id"],
+    isAdmin: boolean
+) => {
+    await db
+        .update(teamMembers)
+        .set({
+            isAdmin,
+        })
+        .where(
+            and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId))
+        )
+        .returning();
 };
