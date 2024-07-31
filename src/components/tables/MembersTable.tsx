@@ -99,7 +99,7 @@ const TeamMembersTable: React.FC<MembersTableProps> = ({
                                 />
                             </TableCell>
                             <TableCell>
-                                {member?.createdAt?.toString()}
+                                {member?.createdAt?.toLocaleString()}
                             </TableCell>
                         </TableRow>
                     ))}
