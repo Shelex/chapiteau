@@ -30,6 +30,7 @@
     "framer-motion": "^11.3.19",
     "jszip": "^3.10.1",
     "lucide-react": "^0.417.0",
+    "mime": "^4.0.4",
     "next": "14.2.5",
     "next-auth": "^5.0.0-beta.19",
     "postcss": "^8.4.40",

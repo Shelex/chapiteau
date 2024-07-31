@@ -1,4 +1,5 @@
 import { promises as fs } from "fs";
+import mime from "mime";
 import { redirect } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
 import path from "path";
@@ -108,6 +109,8 @@ export async function GET(
 
     const { teamId, projectId, runId, filePath } = params;
 
+    const file = Array.isArray(filePath) ? filePath.join("/") : filePath ?? "";
+
     const hasAccess = await userIsTeamMember(session.user.id, params.teamId);
 
     if (!hasAccess) {
@@ -123,22 +126,40 @@ export async function GET(
         teamId,
         projectId,
         runId,
-        ...(filePath ?? [])
+        file
     );
 
     try {
-        await fs.access(targetPath);
-        const content = await fs.readFile(targetPath, "utf-8");
-        const links = (await getRunNeighbors(Number(runId))) ?? {};
-        return new Response(
-            addNav(content, env.AUTH_URL, {
-                ...params,
-                ...links,
-            }),
-            {
-                headers: { "Content-Type": "text/html" },
-            }
-        );
+        const contentType =
+            mime.getType(path.basename(targetPath)) ??
+            "application/octet-stream";
+
+        const headers = {
+            headers: {
+                "Content-Type": contentType ?? "application/octet-stream",
+            },
+        };
+
+        // set navigation buttons for main page
+        if (
+            contentType === "text/html" &&
+            targetPath.includes(`${runId}/index.html`)
+        ) {
+            const links = (await getRunNeighbors(Number(runId))) ?? {};
+            return new NextResponse(
+                addNav(
+                    await fs.readFile(targetPath, { encoding: "utf-8" }),
+                    env.AUTH_URL,
+                    {
+                        ...params,
+                        ...links,
+                    }
+                ),
+                headers
+            );
+        }
+
+        return new NextResponse(await fs.readFile(targetPath), headers);
     } catch (error) {
         return NextResponse.json({ error: "Page not found" }, { status: 404 });
     }
