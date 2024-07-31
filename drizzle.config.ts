@@ -1,5 +1,7 @@
 import "./local.env";
+
 import { type Config } from "drizzle-kit";
+
 import { env } from "./src/env";
 
 export default {

@@ -17,14 +17,6 @@ const config = {
             },
         ],
     },
-    async rewrites() {
-        return [
-            {
-                source: "/reports/:teamId/:projectId/:runId",
-                destination: "/api/report/:teamId/:projectId/:runId",
-            },
-        ];
-    },
 };
 
 export default config;

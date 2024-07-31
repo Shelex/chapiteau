@@ -2,7 +2,7 @@
 import { Button } from "@nextui-org/react";
 import Link from "next/link";
 import { type Session } from "next-auth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CreateProjectModal from "../modals/CreateProjectModal";
 import CreateTeamModal from "../modals/CreateTeamModal";
@@ -14,9 +14,13 @@ export default function Sidebar({
 }: Readonly<{
     session: Session | null;
 }>) {
-    const [currentTeam, setCurrentTeam] = useState(
-        localStorage.getItem("selectedTeam") ?? ""
-    );
+    const [currentTeam, setCurrentTeam] = useState("");
+
+    useEffect(() => {
+        const stored = window.localStorage.getItem("selectedTeam");
+        setCurrentTeam(stored ?? "");
+    }, [currentTeam]);
+
     const [refreshId, setRefreshId] = useState(crypto.randomUUID());
 
     const onChangedTeam = (teamId: string) => {

@@ -15,6 +15,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
     title: "Chapiteau",
     description: "Service for historical Playwright report data",
+    icons: [{ rel: "icon", url: "/public/logo.jpg" }],
 };
 
 export default async function RootLayout({

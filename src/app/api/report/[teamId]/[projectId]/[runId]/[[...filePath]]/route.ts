@@ -16,7 +16,7 @@ interface ReportParams {
     teamId: string;
     projectId: string;
     runId: string;
-    filepath?: string[];
+    filePath?: string[];
 }
 
 const createButton = (id: string, name: string, href?: string) => {
@@ -55,12 +55,16 @@ const addNav = (
         {
             id: "next_button",
             name: "Next Report",
-            href: options.nextRunId && `${reportBaseUrl}/${options.nextRunId}`,
+            href:
+                options.nextRunId &&
+                `${reportBaseUrl}/${options.nextRunId}/index.html`,
         },
         {
             id: "prev_button",
             name: "Prev Report",
-            href: options.prevRunId && `${reportBaseUrl}/${options.prevRunId}`,
+            href:
+                options.prevRunId &&
+                `${reportBaseUrl}/${options.prevRunId}/index.html`,
         },
     ];
 
@@ -102,7 +106,7 @@ export async function GET(
         redirect("/api/auth/signin?callbackUrl=" + req.url);
     }
 
-    const { teamId, projectId, runId, filepath } = params;
+    const { teamId, projectId, runId, filePath } = params;
 
     const hasAccess = await userIsTeamMember(session.user.id, params.teamId);
 
@@ -113,65 +117,29 @@ export async function GET(
         );
     }
 
-    const filePath = path.join(
+    const targetPath = path.join(
         process.cwd(),
         "reports",
         teamId,
         projectId,
         runId,
-        ...(filepath ?? [])
+        ...(filePath ?? [])
     );
 
     try {
-        const stats = await fs.stat(filePath);
-
-        if (stats.isDirectory()) {
-            // If it's a directory, look for an index.html file
-            const indexPath = path.join(filePath, "index.html");
-            try {
-                await fs.access(indexPath);
-                const content = await fs.readFile(indexPath, "utf-8");
-                const links = (await getRunNeighbors(runId)) ?? {};
-                return new Response(
-                    addNav(content, env.AUTH_URL, {
-                        ...params,
-                        ...links,
-                    }),
-                    {
-                        headers: { "Content-Type": "text/html" },
-                    }
-                );
-            } catch (error) {
-                return NextResponse.json(
-                    { error: "Index file not found" },
-                    { status: 404 }
-                );
+        await fs.access(targetPath);
+        const content = await fs.readFile(targetPath, "utf-8");
+        const links = (await getRunNeighbors(runId)) ?? {};
+        return new Response(
+            addNav(content, env.AUTH_URL, {
+                ...params,
+                ...links,
+            }),
+            {
+                headers: { "Content-Type": "text/html" },
             }
-        }
-
-        const content = await fs.readFile(filePath);
-        const contentType = getContentType(filePath);
-        return new Response(content, {
-            headers: { "Content-Type": contentType },
-        });
-    } catch (error) {
-        return NextResponse.json(
-            { error: "File or directory not found" },
-            { status: 404 }
         );
+    } catch (error) {
+        return NextResponse.json({ error: "Page not found" }, { status: 404 });
     }
-}
-
-function getContentType(filePath: string) {
-    const ext = path.extname(filePath).toLowerCase();
-    const types: Record<string, string> = {
-        ".html": "text/html",
-        ".css": "text/css",
-        ".js": "text/javascript",
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".gif": "image/gif",
-        ".mp4": "video/mp4",
-    };
-    return types?.[ext] ?? "application/octet-stream";
 }

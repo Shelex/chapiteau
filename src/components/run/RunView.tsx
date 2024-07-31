@@ -84,6 +84,7 @@ export default function RunView({ teamId, run, isAdmin }: Readonly<RunsProps>) {
                         className="justify-center"
                     >
                         <iframe
+                            title={`"Report Preview ${run.id}"`}
                             className="w-[600px] h-[400px] rounded-lg"
                             src={run.reportUrl}
                         />

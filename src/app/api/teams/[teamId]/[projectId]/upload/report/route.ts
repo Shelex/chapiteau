@@ -76,9 +76,6 @@ export async function POST(
     console.log(
         `going to save report for run ${createdRun.id} to ${baseDestination}`
     );
-    for (const file of files) {
-        console.log(`formData.files include: ${file.name}`);
-    }
 
     try {
         await fs.mkdir(baseDestination, { recursive: true });

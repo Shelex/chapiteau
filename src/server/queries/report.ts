@@ -27,7 +27,7 @@ export const saveReport = async (input: SaveReportInput) => {
         const runId = crypto.randomUUID();
 
         const reportUrl = saveReportLocally
-            ? `${env.AUTH_URL}/reports/${teamId}/${projectId}/${runId}`
+            ? `${env.AUTH_URL}/api/report/${teamId}/${projectId}/${runId}/index.html`
             : report.reportUrl;
 
         const durationMilliseconds = Math.round(report.duration);
