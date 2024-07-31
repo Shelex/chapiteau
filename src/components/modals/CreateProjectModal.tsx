@@ -41,7 +41,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     {(onClose) => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">
-                                Create New Team
+                                Create New Project
                             </ModalHeader>
                             <ModalBody>
                                 <Input

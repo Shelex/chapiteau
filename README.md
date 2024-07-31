@@ -4,6 +4,10 @@
 
 Welcome to the chapiteau - a place where you will observe your playwright test results with blows and whistles to please your manager!
 
+## Demo
+
+There is [invite link](https://chapiteau.shelex.dev/api/teams/a6d130d8-f180-460c-ba0e-5419ddddb0cb/invite/df96f2c2-1b84-4d2e-89a1-3da0252151c1) for a demo team with some randomized data just to have an idea how it works (or not ¯\_(ツ)\_/¯). Only sign in via github is required.
+
 ## Getting Started
 
 -   Sign in with Github
