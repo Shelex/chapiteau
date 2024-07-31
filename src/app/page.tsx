@@ -1,5 +1,12 @@
-import { Checkbox, Chip, Snippet } from "@nextui-org/react";
+import {
+    Checkbox,
+    Chip,
+    Divider,
+    Link as LinkComponent,
+    Snippet,
+} from "@nextui-org/react";
 import { DotIcon, PartyPopperIcon } from "lucide-react";
+import Link from "next/link";
 
 interface HomeProps {
     searchParams?: { selectedTeam?: string };
@@ -21,11 +28,12 @@ export default function Home({ searchParams }: Readonly<HomeProps>) {
                     Sign in with Github
                 </Checkbox>
                 <li className="flex flex-row">
-                    <DotIcon /> Have a team and a project
+                    <DotIcon /> Create a team and a project (if you don&apos;t
+                    have yet)
                 </li>
                 <li className="flex flex-row">
-                    <DotIcon /> Create an api key for your project by selecting
-                    team and click `Manage`
+                    <DotIcon /> Select team, click &quot;Manage&quot;, create an
+                    api key and copy it
                 </li>
                 <li className="flex flex-row">
                     <DotIcon /> Open project page
@@ -34,8 +42,41 @@ export default function Home({ searchParams }: Readonly<HomeProps>) {
                     <DotIcon /> Grab url for specific project
                 </li>
                 <div className="ml-14">
-                    <div className="flex flex-row">
-                        <DotIcon /> to upload just run data:
+                    <div className="flex flex-row mt-5 mb-5">
+                        <DotIcon />
+                        install&nbsp;
+                        <Link
+                            href="https://www.npmjs.com/package/chapiteau-cli"
+                            target="_blank"
+                        >
+                            <LinkComponent>chapiteau-cli</LinkComponent>
+                        </Link>
+                        &nbsp;globally or just use via npx
+                    </div>
+                    <div className="flex flex-row mt-5">
+                        <DotIcon /> upload and serve your report:
+                    </div>
+                    <div className="mt-3 ml-16">
+                        <li>
+                            If provided path is playwright-report - run info
+                            will be parsed from pw report html file and report
+                            will be saved and served with service.
+                        </li>
+                        <li>
+                            <Snippet
+                                size="lg"
+                                style={{
+                                    maxWidth: "100%",
+                                    overflow: "auto",
+                                }}
+                            >
+                                {`npx chapiteau-cli upload --path "./playwright-report"
+                        --url "{URL_FROM_PROJECT_PAGE}" --auth "{PROJECT_API_KEY}"`}
+                            </Snippet>
+                        </li>
+                    </div>
+                    <div className="flex flex-row mt-5">
+                        <DotIcon /> upload just run statistics:
                     </div>
                     <div className="mt-3 ml-16">
                         <li>
@@ -53,44 +94,34 @@ export default function Home({ searchParams }: Readonly<HomeProps>) {
                                 }}
                             >
                                 {`npx chapiteau-cli upload --path
-                    "./playwright-report/index.html" --url "
-                    {URL_FROM_PROJECT_PAGE}" --auth "{PROJECT_API_KEY}"
-                    --build-url "{CI_BUILD_URL_OPTIONAL}" --build-name "
-                    {CI_BUILD_NAME_OPTIONAL}" --report-url "
-                    {LINK_TO_HOSTED_REPORT}"`}
-                            </Snippet>
-                        </li>
-                    </div>
-                    <div className="flex flex-row mt-5">
-                        <DotIcon /> to upload and serve your report
-                    </div>
-                    <div className="mt-3 ml-16">
-                        <li>
-                            If provided path is playwright-report - run info
-                            will be parsed from pw report html file and report
-                            will be saved and served with service.
-                        </li>
-                        <li>
-                            <Snippet
-                                size="lg"
-                                style={{
-                                    maxWidth: "100%",
-                                    overflow: "auto",
-                                }}
-                            >
-                                {`npx chapiteau-cli upload --path "./playwright-report"
-                        --url "{URL_FROM_PROJECT_PAGE}" --auth "
-                        {PROJECT_API_KEY}" --build-url "{CI_BUILD_URL_OPTIONAL}"
-                        --build-name "{CI_BUILD_NAME_OPTIONAL}"`}
+                    "./playwright-report/index.html" --url "{URL_FROM_PROJECT_PAGE}" --auth "{PROJECT_API_KEY}" --report-url "{LINK_TO_HOSTED_REPORT}"`}
                             </Snippet>
                         </li>
                     </div>
                 </div>
                 <li className="flex flex-row mt-3">
-                    <PartyPopperIcon className="mr-2" /> Let the clowns and acrobats do the damn
-                    job under the hood
+                    <PartyPopperIcon className="mr-2" /> Let the clowns and
+                    acrobats do the damn job under the hood
                 </li>
             </ul>
+            <Divider className="mt-10 mb-10" />
+            <p className="mt-10 font-semibold">To invite team member:</p>
+            <li className="flex flex-row">
+                <DotIcon /> Open &quot;manage&quot; page for specific team
+            </li>
+            <li className="flex flex-row">
+                <DotIcon /> Select &quot;Invites&quot; tab
+            </li>
+            <li className="flex flex-row">
+                <DotIcon /> Click &quot;Add&quot;, specify how much members you
+                expect and expiration time
+            </li>
+            <li className="flex flex-row">
+                <DotIcon /> Share the link with team members
+            </li>
+            <li className="flex flex-row">
+                <DotIcon /> Hope that they will not break anything
+            </li>
         </div>
     );
 }
