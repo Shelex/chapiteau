@@ -130,9 +130,11 @@ export async function GET(
     );
 
     try {
-        const contentType =
-            mime.getType(path.basename(targetPath)) ??
-            "application/octet-stream";
+        const contentType = mime.getType(path.basename(targetPath));
+
+        if (!contentType && !path.extname(targetPath)) {
+            return NextResponse.next();
+        }
 
         const headers = {
             headers: {
@@ -146,10 +148,10 @@ export async function GET(
             targetPath.includes(`${runId}/index.html`)
         ) {
             const links = (await getRunNeighbors(Number(runId))) ?? {};
-            return new NextResponse(
+            return new Response(
                 addNav(
                     await fs.readFile(targetPath, { encoding: "utf-8" }),
-                    env.AUTH_URL,
+                    env.NEXT_PUBLIC_AUTH_URL,
                     {
                         ...params,
                         ...links,
@@ -159,7 +161,7 @@ export async function GET(
             );
         }
 
-        return new NextResponse(await fs.readFile(targetPath), headers);
+        return new Response(await fs.readFile(targetPath), headers);
     } catch (error) {
         return NextResponse.json({ error: "Page not found" }, { status: 404 });
     }
