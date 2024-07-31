@@ -41,6 +41,10 @@ export const getInvites = async (teamId: string) => {
     return await db.select().from(invites).where(eq(invites.teamId, teamId));
 };
 
+export const deleteInvite = async (id: string) => {
+    return await db.delete(invites).where(eq(invites.id, id));
+};
+
 export const acceptInvite = async (teamId: string, token: string) => {
     const session = await auth();
     if (!session?.user?.id) {

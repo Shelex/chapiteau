@@ -1,20 +1,18 @@
 "use client";
 import {
-    Button,
     Table,
     TableBody,
     TableCell,
     TableColumn,
     TableHeader,
     TableRow,
-    Tooltip,
 } from "@nextui-org/react";
-import { DeleteIcon, EditIcon } from "lucide-react";
 import React from "react";
 
-import { type ApiKey,type Team } from "~/server/db/schema";
+import { type ApiKey, type Team } from "~/server/db/schema";
 
 import CreateApiKeyModal from "../modals/CreateApiKeyModal";
+import DeleteApiKey from "../modals/DeleteApiKeyModal";
 
 interface ApiKeysTableProps {
     apiKeys: Omit<ApiKey, "token" | "teamId">[];
@@ -40,35 +38,18 @@ const ApiKeysTable: React.FC<ApiKeysTableProps> = ({
                 </TableHeader>
                 <TableBody>
                     {apiKeys.map((apiKey) => (
-                        <TableRow key={apiKey?.id}>
-                            <TableCell>{apiKey?.name}</TableCell>
-                            <TableCell>{apiKey?.expireAt.toString()}</TableCell>
+                        <TableRow key={apiKey.id}>
+                            <TableCell>{apiKey.name}</TableCell>
+                            <TableCell>{apiKey.expireAt.toString()}</TableCell>
                             <TableCell>
-                                {apiKey?.createdAt?.toString()}
+                                {apiKey.createdAt?.toLocaleString()}
                             </TableCell>
-                            <TableCell>{apiKey?.createdBy}</TableCell>
+                            <TableCell>{apiKey.createdBy}</TableCell>
                             <TableCell>
-                                <Tooltip
-                                    content="Edit Api Key"
-                                    isDisabled={!isAdmin}
-                                >
-                                    <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                                        <Button disabled={!isAdmin}>
-                                            <EditIcon />
-                                        </Button>
-                                    </span>
-                                </Tooltip>
-                                <Tooltip
-                                    isDisabled={!isAdmin}
-                                    color="danger"
-                                    content="Delete Api Key"
-                                >
-                                    <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                                        <Button disabled={!isAdmin}>
-                                            <DeleteIcon />
-                                        </Button>
-                                    </span>
-                                </Tooltip>
+                                <DeleteApiKey
+                                    keyId={apiKey.id}
+                                    isAdmin={isAdmin}
+                                />
                             </TableCell>
                         </TableRow>
                     ))}

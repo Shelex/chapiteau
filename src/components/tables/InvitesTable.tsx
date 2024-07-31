@@ -1,6 +1,5 @@
 "use client";
 import {
-    Button,
     Chip,
     Table,
     TableBody,
@@ -8,14 +7,13 @@ import {
     TableColumn,
     TableHeader,
     TableRow,
-    Tooltip,
 } from "@nextui-org/react";
-import { DeleteIcon, EditIcon } from "lucide-react";
 import React from "react";
 
 import { type Invite, type Team } from "~/server/db/schema";
 
 import CreateInviteModal from "../modals/CreateInviteModal";
+import DeleteInvite from "../modals/DeleteInviteModal";
 
 interface InvitesTableProps {
     invites: Invite[];
@@ -52,35 +50,19 @@ const InvitesTable: React.FC<InvitesTableProps> = ({
                                     {invite.active ? "Active" : "Inactive"}
                                 </Chip>
                             </TableCell>
-                            <TableCell>{invite.expireAt.toString()}</TableCell>
+                            <TableCell>{invite.expireAt.toLocaleString()}</TableCell>
                             <TableCell>
                                 {invite.count}/{invite.limit}
                             </TableCell>
                             <TableCell>
-                                {invite.createdAt?.toString()}
+                                {invite.createdAt?.toLocaleString()}
                             </TableCell>
                             <TableCell>{invite?.createdBy}</TableCell>
                             <TableCell>
-                                <Tooltip
-                                    content="Edit Invite"
-                                    color="warning"
-                                >
-                                    <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                                        <Button disabled={!isAdmin}>
-                                            <EditIcon />
-                                        </Button>
-                                    </span>
-                                </Tooltip>
-                                <Tooltip
-                                    color="danger"
-                                    content="Delete Invite"
-                                >
-                                    <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                                        <Button disabled={!isAdmin}>
-                                            <DeleteIcon />
-                                        </Button>
-                                    </span>
-                                </Tooltip>
+                                <DeleteInvite
+                                    inviteId={invite.id}
+                                    isAdmin={isAdmin}
+                                />
                             </TableCell>
                         </TableRow>
                     ))}
