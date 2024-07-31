@@ -148,13 +148,16 @@ export const saveReport = async (input: SaveReportInput) => {
     });
 };
 
-export const getRunNeighbors = async (numericRunId: number) => {
-    const found = await db
+export const getRunNeighbors = async (
+    projectId: string,
+    numericRunId: number
+) => {
+    const [run] = await db
         .select()
         .from(runs)
-        .where(eq(runs.numericId, numericRunId));
-
-    const [run] = found;
+        .where(
+            and(eq(runs.projectId, projectId), eq(runs.numericId, numericRunId))
+        );
 
     if (!run) {
         return null;

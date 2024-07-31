@@ -147,7 +147,7 @@ export async function GET(
             contentType === "text/html" &&
             targetPath.includes(`${runId}/index.html`)
         ) {
-            const links = (await getRunNeighbors(Number(runId))) ?? {};
+            const links = (await getRunNeighbors(projectId, Number(runId))) ?? {};
             return new Response(
                 addNav(
                     await fs.readFile(targetPath, { encoding: "utf-8" }),
