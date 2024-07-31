@@ -3,6 +3,7 @@ import "./globals.css";
 import { NextUIProvider } from "@nextui-org/react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Head from "next/head";
 import { redirect } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 
@@ -33,6 +34,13 @@ export default async function RootLayout({
 
     return (
         <html lang="en">
+            <Head>
+                <script
+                    defer
+                    src="https://analytics.shelex.dev/script.js"
+                    data-website-id="47a1fa0d-0aef-4576-b5d4-399fef7a202b"
+                ></script>
+            </Head>
             <body className={inter.className}>
                 <NextUIProvider>
                     <SessionProvider basePath={"/api/auth"} session={session}>
