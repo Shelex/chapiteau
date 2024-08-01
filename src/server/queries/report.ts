@@ -9,7 +9,7 @@ import { type BuildInfo, type Report } from "~/lib/parser";
 import { db } from "~/server/db";
 import { files, runs, testAttachments, tests } from "~/server/db/schema";
 
-import { userIsAdmin } from "./users";
+import { verifyMembership } from "./users";
 
 interface SaveReportInput {
     createdBy: string;
@@ -202,9 +202,9 @@ export const getRunNeighbors = async (
 
 export const deleteRun = async (runId: string, teamId: string) => {
     const session = await auth();
-    const hasAccess = await userIsAdmin(session?.user?.id, teamId);
+    const { isAdmin } = await verifyMembership(session?.user?.id, teamId);
 
-    if (!hasAccess) {
+    if (!isAdmin) {
         return { error: "Unauthorized" };
     }
 

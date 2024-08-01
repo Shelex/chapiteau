@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "~/auth";
-import Team from '~/components/team/ManageTeam'
-import { getTeam, userIsAdmin } from "~/server/queries";
+import Team from "~/components/team/ManageTeam";
+import { getTeam, verifyMembership } from "~/server/queries";
 
 interface TeamProps {
     params: { id: string };
@@ -22,7 +22,14 @@ export default async function TeamPage({ params }: Readonly<TeamProps>) {
         return <p>Team not found</p>;
     }
 
-    const isAdmin = await userIsAdmin(session.user.id, team.id);
+    const { isAdmin, isMember } = await verifyMembership(
+        session.user.id,
+        team.id
+    );
+
+    if (!isMember) {
+        redirect("/404");
+    }
 
     return (
         <div className="text-center">

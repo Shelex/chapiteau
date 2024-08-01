@@ -36,6 +36,10 @@ const CreateApiKeyModal = ({ team }: CreateInviteModalProps) => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateApiKeyServer = async () => {
+        // TODO use form
+        if (!expireAt || !limit || limit < 0 || limit > 32767) {
+            return;
+        }
         const created = await createInvite({
             teamId: team.id,
             expireAt: expireAt.toDate(getLocalTimeZone()),
@@ -79,17 +83,31 @@ const CreateApiKeyModal = ({ team }: CreateInviteModalProps) => {
                                     label="How much users can accept invite"
                                     isRequired
                                     value={limit.toString()}
-                                    onChange={(e) =>
-                                        isNaN(Number(e.target.value))
-                                            ? 0
-                                            : setLimit(Number(e.target.value))
-                                    }
+                                    validate={(value) => {
+                                        const num = Number(value);
+                                        if (isNaN(num))
+                                            return "Limit should be a number";
+                                        if (num < 1)
+                                            return "Limit should be a positive number";
+                                        if (num > 32767)
+                                            return "Limit should be less than 32767";
+                                        return true;
+                                    }}
+                                    onChange={(e) => {
+                                        const numeric = Number(e.target.value);
+                                        !isNaN(numeric) && setLimit(numeric);
+                                    }}
                                 />
                                 <DatePicker
                                     isRequired
                                     hourCycle={24}
                                     label="Expire At"
                                     value={expireAt}
+                                    validate={(value) =>
+                                        !!value
+                                            ? true
+                                            : "Expiration date is required"
+                                    }
                                     onChange={setExpireAt}
                                 />
                             </ModalBody>

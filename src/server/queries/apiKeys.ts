@@ -64,7 +64,7 @@ export const validateApiKey = async (token: string, teamId: string) => {
         return result;
     }
 
-    const apiKey = await db
+    const [apiKey] = await db
         .select()
         .from(apiKeys)
         .where(eq(apiKeys.token, token))
@@ -73,19 +73,17 @@ export const validateApiKey = async (token: string, teamId: string) => {
         return result;
     }
 
-    const found = apiKey.at(0);
-
-    if (!found?.expireAt) {
+    if (!apiKey?.expireAt) {
         return result;
     }
 
-    if (found.teamId !== teamId) {
+    if (apiKey.teamId !== teamId) {
         return result;
     }
 
-    if (found.expireAt < new Date()) {
+    if (apiKey.expireAt < new Date()) {
         return result;
     }
 
-    return { isValid: true, apiKeyName: found.name };
+    return { isValid: true, apiKeyName: apiKey.name };
 };

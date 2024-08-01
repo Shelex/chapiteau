@@ -26,6 +26,10 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateProject = async () => {
+        // TODO use form
+        if (!projectName || projectName?.length > 50 || !teamId) {
+            return;
+        }
         await createProject(projectName, teamId);
         setProjectName("");
         onCreated?.(teamId);
@@ -49,6 +53,13 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                                     onChange={(e) =>
                                         setProjectName(e.target.value)
                                     }
+                                    validate={(value) => {
+                                        if (!value)
+                                            return "Project Name is required";
+                                        if (value.length > 50)
+                                            return "Project Name is too long";
+                                        return true
+                                    }}
                                     placeholder="Project Name"
                                 />
                             </ModalBody>

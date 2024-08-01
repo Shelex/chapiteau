@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { auth } from "~/auth";
-import { acceptInvite, userIsTeamMember } from "~/server/queries";
+import { acceptInvite, verifyMembership } from "~/server/queries";
 
 interface InviteParams {
     teamId: string;
@@ -37,9 +37,9 @@ export async function GET(
 
     const { teamId, inviteToken } = params;
 
-    const hasAccess = await userIsTeamMember(session.user.id, params.teamId);
+    const { isMember } = await verifyMembership(session.user.id, params.teamId);
 
-    if (hasAccess) {
+    if (isMember) {
         return NextResponse.json(
             { error: "You already have access to the team" },
             { status: 400 }

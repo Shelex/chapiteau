@@ -25,6 +25,10 @@ const CreateTeamModal = ({ userId, onCreated }: CreateTeamModalProps) => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateTeam = async () => {
+        // TODO use form
+        if (!teamName || teamName?.length > 50) {
+            return;
+        }
         const created = await createTeam(teamName, userId);
         if (!created) {
             return;
@@ -49,8 +53,16 @@ const CreateTeamModal = ({ userId, onCreated }: CreateTeamModalProps) => {
                                 <Input
                                     value={teamName}
                                     onChange={(e) =>
+                                        e.target.value &&
                                         setTeamName(e.target.value)
                                     }
+                                    validate={(value) => {
+                                        if (!value)
+                                            return "Team Name is required";
+                                        if (value.length > 50)
+                                            return "Team Name is too long";
+                                        return true
+                                    }}
                                     placeholder="Team Name"
                                 />
                             </ModalBody>

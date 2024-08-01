@@ -6,7 +6,7 @@ import path from "path";
 
 import { auth } from "~/auth";
 import { env } from "~/env";
-import { getRunNeighbors, userIsTeamMember } from "~/server/queries";
+import { getRunNeighbors, verifyMembership } from "~/server/queries";
 
 interface Links {
     nextRunId?: string;
@@ -111,13 +111,10 @@ export async function GET(
 
     const file = Array.isArray(filePath) ? filePath.join("/") : filePath ?? "";
 
-    const hasAccess = await userIsTeamMember(session.user.id, params.teamId);
+    const { isMember } = await verifyMembership(session.user.id, params.teamId);
 
-    if (!hasAccess) {
-        return NextResponse.json(
-            { error: "You do not have access to this team" },
-            { status: 403 }
-        );
+    if (!isMember) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     const targetPath = path.join(
@@ -147,7 +144,8 @@ export async function GET(
             contentType === "text/html" &&
             targetPath.includes(`${runId}/index.html`)
         ) {
-            const links = (await getRunNeighbors(projectId, Number(runId))) ?? {};
+            const links =
+                (await getRunNeighbors(projectId, Number(runId))) ?? {};
             return new Response(
                 addNav(
                     await fs.readFile(targetPath, { encoding: "utf-8" }),

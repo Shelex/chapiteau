@@ -27,36 +27,27 @@ export const getTeams = async (userId: User["id"]) => {
     return await db.select().from(teams).where(inArray(teams.id, ids));
 };
 
-export const userIsTeamMember = async (
+export const verifyMembership = async (
     userId?: User["id"],
     teamId?: Team["id"]
 ) => {
     if (!userId || !teamId) {
-        return false;
+        return {
+            isMember: false,
+            isAdmin: false,
+        };
     }
+
     const [member] = await db
-        .select({})
+        .select()
         .from(teamMembers)
         .where(
             and(eq(teamMembers.userId, userId), eq(teamMembers.teamId, teamId))
         )
         .limit(1);
 
-    return !!member;
-};
-
-export const userIsAdmin = async (userId?: User["id"], teamId?: Team["id"]) => {
-    if (!userId || !teamId) {
-        return false;
-    }
-
-    const [member] = await db
-        .select({ isAdmin: teamMembers.isAdmin })
-        .from(teamMembers)
-        .where(
-            and(eq(teamMembers.userId, userId), eq(teamMembers.teamId, teamId))
-        )
-        .limit(1);
-
-    return !!member?.isAdmin;
+    return {
+        isMember: !!member,
+        isAdmin: !!member?.isAdmin,
+    };
 };

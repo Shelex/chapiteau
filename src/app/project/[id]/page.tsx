@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "~/auth";
 import { RunsChart } from "~/components/charts/RunsChart";
 import RunView from "~/components/run/RunView";
-import { getProjectDashboard, userIsAdmin } from "~/server/queries";
+import { getProjectDashboard, verifyMembership } from "~/server/queries";
 const ProjectView = dynamic(() => import("~/components/project/ProjectView"), {
     ssr: false,
     loading: () => <p>Loading project...</p>,
@@ -22,7 +22,11 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
     }
 
     const { project, runs } = await getProjectDashboard(params.id ?? "");
-    const isAdmin = await userIsAdmin(session.user.id, project?.teamId);
+    const {isAdmin, isMember} = await verifyMembership(session.user.id, project?.teamId);
+
+    if (!isMember) {
+        redirect("/404");
+    }
 
     return (
         <div className="text-center">

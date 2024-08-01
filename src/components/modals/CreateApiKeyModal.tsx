@@ -36,6 +36,10 @@ const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleCreateApiKeyServer = async () => {
+        // TODO use form
+        if (!keyName || keyName?.length > 50 || !expireAt) {
+            return;
+        }
         const created = await createApiKey({
             name: keyName,
             teamId: team.id,
@@ -72,7 +76,14 @@ const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
                                 <Input
                                     isRequired
                                     value={keyName}
-                                    onChange={(e) => setKeyName(e.target.value)}
+                                    onChange={(e) => !!e.target.value && setKeyName(e.target.value)}
+                                    validate={(value) => {
+                                        if (!value)
+                                            return "Api Key Name is required";
+                                        if (value.length > 50)
+                                            return "Api Key Name is too long";
+                                        return true
+                                    }}
                                     placeholder="Api Key Name"
                                 />
                                 <DatePicker
@@ -80,6 +91,7 @@ const CreateApiKeyModal = ({ team }: CreateApiKeyModalProps) => {
                                     hourCycle={24}
                                     label="Expire At"
                                     value={expireAt}
+                                    validate={(value) => !!value ? true : "Expiration date is required"}
                                     onChange={setExpireAt}
                                 />
                             </ModalBody>

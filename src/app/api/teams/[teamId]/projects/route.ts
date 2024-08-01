@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "~/auth";
-import { createProject, getProjects, userIsTeamMember } from "~/server/queries";
+import { createProject, getProjects, verifyMembership } from "~/server/queries";
 
 const createProjectRequestSchema = z.object({
     name: z.string(),
@@ -18,7 +18,7 @@ export async function POST(
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const isMember = await userIsTeamMember(session.user.id, params.teamId);
+    const { isMember } = await verifyMembership(session.user.id, params.teamId);
     if (!isMember) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -52,7 +52,7 @@ export async function GET(
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const isMember = await userIsTeamMember(session.user.id, params.teamId);
+    const { isMember } = await verifyMembership(session.user.id, params.teamId);
     if (!isMember) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
