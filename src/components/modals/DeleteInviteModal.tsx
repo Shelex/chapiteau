@@ -9,10 +9,11 @@ import {
     useDisclosure,
 } from "@nextui-org/modal";
 import { Tooltip } from "@nextui-org/react";
-import { DeleteIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { deleteInvite as deleteInviteServer } from "~/server/queries";
+
+import { DeleteIcon } from "../icons/DeleteIcon";
 
 interface DeleteInviteProps {
     inviteId: string;
@@ -36,9 +37,15 @@ export default function DeleteInvite({ inviteId, isAdmin }: DeleteInviteProps) {
         !!inviteId && (
             <>
                 <Tooltip color="danger" content="Delete Invite">
-                    <Button color="danger" disabled={!isAdmin} onPress={onOpen}>
-                        <DeleteIcon />
-                    </Button>
+                    {isAdmin && (
+                        <Button
+                            color="danger"
+                            disabled={!isAdmin}
+                            onPress={onOpen}
+                        >
+                            <DeleteIcon />
+                        </Button>
+                    )}
                 </Tooltip>
                 <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                     <ModalContent>

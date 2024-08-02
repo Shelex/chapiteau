@@ -3,12 +3,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
     CalendarDate,
     CalendarDateTime,
+    type DateValue,
     getLocalTimeZone,
     today,
 } from "@internationalized/date";
-import { Button } from "@nextui-org/button";
-import { DatePicker } from "@nextui-org/date-picker";
-import { Input } from "@nextui-org/input";
 import {
     Modal,
     ModalBody,
@@ -17,15 +15,16 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
-import { type DateValue, Tooltip } from "@nextui-org/react";
+import { Button, DatePicker, Input, Tooltip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { type Team } from "~/server/db/schema";
-import { createInvite } from "~/server/queries";
+import { type ApiKey, type Team } from "~/server/db/schema";
+import { createApiKey, editApiKey } from "~/server/queries";
 
+import { EditIcon } from "../icons/EditIcon";
 import { PlusIcon } from "../icons/PlusIcon";
 import {
     Form,
@@ -35,14 +34,17 @@ import {
     FormMessage,
 } from "../ui/form";
 
-interface CreateInviteModalProps {
+type ApiKeyAction = "create" | "edit";
+
+interface ApiKeyModalProps {
     team: Team;
-    onCreated: (token: string) => void;
-    isAdmin: boolean;
+    apiKey?: Omit<ApiKey, "token" | "teamId">;
+    onChange?: (data: string) => void;
+    action: ApiKeyAction;
 }
 
-const inviteInputSchema = z.object({
-    limit: z.number().int().min(1).max(32767),
+const apiKeyInputSchema = z.object({
+    name: z.string().min(1).max(50),
     expireAt: z.custom<DateValue>(
         (val: DateValue) =>
             val instanceof CalendarDate || val instanceof CalendarDateTime,
@@ -52,76 +54,103 @@ const inviteInputSchema = z.object({
     ),
 });
 
-type InviteInput = z.infer<typeof inviteInputSchema>;
+type ApiKeyInput = z.infer<typeof apiKeyInputSchema>;
 
-const CreateInviteModal = ({
-    team,
-    onCreated,
-    isAdmin,
-}: CreateInviteModalProps) => {
+const configuration = {
+    create: {
+        triggerButtonText: "Add Api Key",
+        modalTitle: "Create New Api Key",
+        modalSubmitButtonText: "Create",
+        action: createApiKey,
+    },
+    edit: {
+        triggerButtonText: "Edit",
+        modalTitle: "Edit Api Key",
+        modalSubmitButtonText: "Edit",
+        action: editApiKey,
+    },
+};
+
+const ApiKeyModal = ({ team, onChange, action, apiKey }: ApiKeyModalProps) => {
     const router = useRouter();
 
-    const form = useForm<InviteInput>({
-        resolver: zodResolver(inviteInputSchema),
+    const form = useForm<ApiKeyInput>({
+        resolver: zodResolver(apiKeyInputSchema),
         defaultValues: {
-            limit: 1,
-            expireAt: today(getLocalTimeZone()).add({ days: 1 }),
+            name: action === "create" ? "" : apiKey?.name ?? "",
+            expireAt:
+                action === "create"
+                    ? today(getLocalTimeZone()).add({ days: 1 })
+                    : !!apiKey?.expireAt
+                    ? new CalendarDate(
+                          apiKey.expireAt.getFullYear(),
+                          apiKey.expireAt.getMonth() + 1,
+                          apiKey.expireAt.getDate()
+                      )
+                    : today(getLocalTimeZone()),
         },
     });
 
+    const config = configuration[action];
+
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
-    async function onSubmit(values: InviteInput) {
-        const created = await createInvite({
-            teamId: team.id,
-            expireAt: values.expireAt.toDate(getLocalTimeZone()),
-            limit: values.limit,
-        });
-        if (!created) {
+    async function onSubmit(values: ApiKeyInput) {
+        const input = { ...values, teamId: team.id };
+        const result = await config.action(
+            {
+                ...input,
+                expireAt: values.expireAt.toDate(getLocalTimeZone()),
+            },
+            apiKey?.id ?? ""
+        );
+        if (!result) {
             return;
         }
 
-        router.refresh();
-        onCreated(created?.token ?? "");
+        onChange?.(action === "create" ? result.token : result.id) ??
+            router.refresh();
         onClose?.();
         form.reset();
     }
 
     return (
         <div>
-            <Tooltip color="success" content={"create invite"} placement="left">
-                {isAdmin && (
-                    <Button className="w-full" color="success" onPress={onOpen}>
-                        <PlusIcon />
+            <div className="flex flex-row">
+                <Tooltip
+                    color={action === "create" ? "success" : "warning"}
+                    content={`${action} api key`}
+                    placement="left"
+                >
+                    <Button
+                        className="w-full"
+                        color={action === "create" ? "success" : "warning"}
+                        onPress={onOpen}
+                    >
+                        {action === "create" ? <PlusIcon /> : <EditIcon />}
                     </Button>
-                )}
-            </Tooltip>
+                </Tooltip>
+            </div>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
                     {(onClose) => (
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
                                 <ModalHeader className="flex flex-col gap-1">
-                                    Create New Invite
+                                    {config.modalTitle}
                                 </ModalHeader>
                                 <ModalBody>
                                     <FormField
                                         control={form.control}
-                                        name="limit"
-                                        render={() => (
+                                        name="name"
+                                        render={({ field }) => (
                                             <FormItem>
                                                 <FormControl>
                                                     <Input
                                                         isRequired
-                                                        label="How much users can accept invite"
-                                                        placeholder="members limit"
-                                                        {...form.register(
-                                                            "limit",
-                                                            {
-                                                                valueAsNumber:
-                                                                    true,
-                                                            }
-                                                        )}
+                                                        label="Name"
+                                                        placeholder="api key name"
+                                                        {...field}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -135,9 +164,9 @@ const CreateInviteModal = ({
                                             <FormItem>
                                                 <FormControl>
                                                     <DatePicker
+                                                        isRequired
                                                         showMonthAndYearPickers
                                                         value={field.value}
-                                                        isRequired
                                                         granularity="day"
                                                         label="Expire at"
                                                         minValue={today(
@@ -168,7 +197,7 @@ const CreateInviteModal = ({
                                         Close
                                     </Button>
                                     <Button color="primary" type="submit">
-                                        Create
+                                        {config.modalSubmitButtonText}
                                     </Button>
                                 </ModalFooter>
                             </form>
@@ -180,4 +209,4 @@ const CreateInviteModal = ({
     );
 };
 
-export default CreateInviteModal;
+export default ApiKeyModal;

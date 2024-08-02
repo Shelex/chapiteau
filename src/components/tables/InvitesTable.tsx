@@ -1,6 +1,7 @@
 "use client";
 import {
     Chip,
+    Snippet,
     Table,
     TableBody,
     TableCell,
@@ -8,8 +9,9 @@ import {
     TableHeader,
     TableRow,
 } from "@nextui-org/react";
-import React from "react";
+import React, { useState } from "react";
 
+import { env } from "~/env";
 import { type Invite, type Team } from "~/server/db/schema";
 
 import CreateInviteModal from "../modals/CreateInviteModal";
@@ -26,9 +28,30 @@ const InvitesTable: React.FC<InvitesTableProps> = ({
     team,
     isAdmin,
 }) => {
+    const [created, setCreated] = useState("");
     return (
         <div>
-            {team && <CreateInviteModal team={team} />}
+            {team && (
+                <div className="m-2 float-end h-10">
+                    <CreateInviteModal
+                        team={team}
+                        onCreated={setCreated}
+                        isAdmin={isAdmin}
+                    />
+                </div>
+            )}
+            {created && !!team && (
+                <>
+                    <p>
+                        Please share this url with members you want to invite:
+                    </p>
+                    <Snippet
+                        color="success"
+                        size="sm"
+                        hideSymbol
+                    >{`${env.NEXT_PUBLIC_AUTH_URL}/api/teams/${team?.id}/invite/${created}`}</Snippet>
+                </>
+            )}
             <Table title="Invites" isStriped>
                 <TableHeader>
                     <TableColumn>ID</TableColumn>
@@ -42,23 +65,27 @@ const InvitesTable: React.FC<InvitesTableProps> = ({
                 <TableBody>
                     {invites.map((invite) => (
                         <TableRow key={invite.id}>
-                            <TableCell>{invite.id}</TableCell>
-                            <TableCell>
+                            <TableCell className="w-3/12">
+                                {invite.id}
+                            </TableCell>
+                            <TableCell className="w-1/12">
                                 <Chip
                                     color={invite.active ? "success" : "danger"}
                                 >
                                     {invite.active ? "Active" : "Inactive"}
                                 </Chip>
                             </TableCell>
-                            <TableCell>{invite.expireAt.toLocaleString()}</TableCell>
-                            <TableCell>
+                            <TableCell className="w-2/12">
+                                {invite.expireAt.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="w-1/12">
                                 {invite.count}/{invite.limit}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="w-2/12">
                                 {invite.createdAt?.toLocaleString()}
                             </TableCell>
                             <TableCell>{invite?.createdBy}</TableCell>
-                            <TableCell>
+                            <TableCell className="w-1/12">
                                 <DeleteInvite
                                     inviteId={invite.id}
                                     isAdmin={isAdmin}

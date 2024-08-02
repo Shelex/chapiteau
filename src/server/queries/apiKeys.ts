@@ -1,5 +1,5 @@
-"use server"
-import { eq } from "drizzle-orm";
+"use server";
+import { desc, eq } from "drizzle-orm";
 
 import { auth } from "~/auth";
 import { isUuid } from "~/lib/utils";
@@ -35,11 +35,31 @@ export const createApiKey = async (apiKey: ApiKeyInput) => {
     return created;
 };
 
+export const editApiKey = async (apiKey: ApiKeyInput, id: string) => {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return;
+    }
+
+    const expireAt = new Date(apiKey.expireAt);
+    const [updated] = await db
+        .update(apiKeys)
+        .set({
+            name: apiKey.name,
+            expireAt: expireAt,
+        })
+        .where(eq(apiKeys.id, id))
+        .returning();
+
+    return updated;
+};
+
 export const getApiKeys = async (teamId: string) => {
     const keys = await db
         .select()
         .from(apiKeys)
-        .where(eq(apiKeys.teamId, teamId));
+        .where(eq(apiKeys.teamId, teamId))
+        .orderBy(desc(apiKeys.createdAt));
 
     return keys.map((key) => ({
         id: key.id,

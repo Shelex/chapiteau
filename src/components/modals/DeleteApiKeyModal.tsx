@@ -9,10 +9,11 @@ import {
     useDisclosure,
 } from "@nextui-org/modal";
 import { Tooltip } from "@nextui-org/react";
-import { DeleteIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { deleteApiKey as deleteAoiKeyServer } from "~/server/queries";
+
+import { DeleteIcon } from "../icons/DeleteIcon";
 
 interface DeleteApiKeyProps {
     keyId: string;
@@ -35,10 +36,20 @@ export default function DeleteApiKey({ keyId, isAdmin }: DeleteApiKeyProps) {
     return (
         !!keyId && (
             <>
-                <Tooltip color="danger" content="Delete Api Key">
-                    <Button color="danger" disabled={!isAdmin} onPress={onOpen}>
-                        <DeleteIcon />
-                    </Button>
+                <Tooltip
+                    color="danger"
+                    content="delete api key"
+                    placement="left"
+                >
+                    {isAdmin && (
+                        <Button
+                            className="w-full"
+                            color="danger"
+                            onPress={onOpen}
+                        >
+                            <DeleteIcon />
+                        </Button>
+                    )}
                 </Tooltip>
                 <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                     <ModalContent>

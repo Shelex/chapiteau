@@ -1,14 +1,10 @@
-import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 
 import { auth } from "~/auth";
 import { RunsChart } from "~/components/charts/RunsChart";
+import ProjectView from "~/components/project/ProjectView";
 import RunView from "~/components/run/RunView";
 import { getProjectDashboard, verifyMembership } from "~/server/queries";
-const ProjectView = dynamic(() => import("~/components/project/ProjectView"), {
-    ssr: false,
-    loading: () => <p>Loading project...</p>,
-});
 
 interface ProjectProps {
     params: { id: string };
@@ -22,7 +18,10 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
     }
 
     const { project, runs } = await getProjectDashboard(params.id ?? "");
-    const {isAdmin, isMember} = await verifyMembership(session.user.id, project?.teamId);
+    const { isAdmin, isMember } = await verifyMembership(
+        session.user.id,
+        project?.teamId
+    );
 
     if (!isMember) {
         redirect("/404");
@@ -37,7 +36,10 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
                     <ul>
                         <div className="flex flex-row justify-between flex-wrap">
                             {runs.map((run) => (
-                                <li key={run.id} className="w-1/2 min-w-max my-4 p-4">
+                                <li
+                                    key={run.id}
+                                    className="w-1/2 min-w-max my-4 p-4"
+                                >
                                     <RunView
                                         teamId={project?.teamId}
                                         run={run}

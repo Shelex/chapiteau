@@ -4,10 +4,11 @@ import Link from "next/link";
 import { type Session } from "next-auth";
 import { useEffect, useState } from "react";
 
-import CreateProjectModal from "../modals/CreateProjectModal";
-import CreateTeamModal from "../modals/CreateTeamModal";
+import ProjectModal from "../modals/ProjectModal";
+import TeamModal from "../modals/TeamModal";
 import ProjectList from "../project/ProjectList";
 import TeamSelector from "../team/TeamSelector";
+import { Switch } from "../ui/switch";
 
 export default function Sidebar({
     session,
@@ -33,6 +34,8 @@ export default function Sidebar({
         setRefreshId(crypto.randomUUID());
     };
 
+    const [enableEditProjects, setEnableEditProjects] = useState(false);
+
     return (
         <div className="flex-col m-4 h-screen">
             <div className="min-w-full">
@@ -43,9 +46,10 @@ export default function Sidebar({
             </div>
             <div className="p-1 m-1 flex flex-wrap">
                 <div className="grow p-1">
-                    <CreateTeamModal
+                    <TeamModal
                         userId={session?.user?.id ?? ""}
-                        onCreated={onChangedTeam}
+                        onChange={onChangedTeam}
+                        action="create"
                     />
                 </div>
                 <div className="grow p-1">
@@ -65,19 +69,42 @@ export default function Sidebar({
             </div>
             {currentTeam && (
                 <div className="flex flex-col rounded h-screen">
-                    <div className="flex flex-wrap justify-between p-4 bg-primary-50 rounded-xl">
-                        <div className="font-bold">Projects</div>
-                        <div>
-                            <CreateProjectModal
+                    <div className="flex flex-wrap justify-between p-2 bg-primary-50 rounded-xl">
+                        <div className="flex flex-col h-16">
+                            <div className="font-bold">Projects</div>
+                            <div className="mt-4 w-full">
+                                <Switch
+                                    id="edit-projects"
+                                    checked={enableEditProjects}
+                                    onCheckedChange={setEnableEditProjects}
+                                    className="data-[state=checked]:bg-warning data-[state=unchecked]:bg-default w-16"
+                                    uncheckeditem={
+                                        <p className="text-primary ml-1 w-4">
+                                            edit
+                                        </p>
+                                    }
+                                    checkeditem={
+                                        <p className="text-white ml-1 w-4">
+                                            off
+                                        </p>
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-center justify-center">
+                            <ProjectModal
                                 teamId={currentTeam}
-                                onCreated={onCreatedProject}
+                                onChange={onCreatedProject}
+                                action="create"
                             />
                         </div>
                     </div>
                     <div>
                         <ProjectList
                             teamId={currentTeam}
+                            onChange={onCreatedProject}
                             refreshId={refreshId}
+                            enabledEdit={enableEditProjects}
                         />
                     </div>
                 </div>

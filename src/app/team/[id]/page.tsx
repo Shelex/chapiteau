@@ -33,7 +33,7 @@ export default async function TeamPage({ params }: Readonly<TeamProps>) {
 
     return (
         <div className="text-center">
-            <Team team={team} isAdmin={isAdmin} />
+            <Team userId={session.user.id} team={team} isAdmin={isAdmin} />
         </div>
     );
 }

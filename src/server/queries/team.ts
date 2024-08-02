@@ -34,6 +34,20 @@ export const createTeam = async (name: string, userId: string) => {
     });
 };
 
+export const renameTeam = async (name: string, teamId?: string) => {
+    if (!teamId) {
+        return;
+    }
+    const [team] = await db
+        .update(teams)
+        .set({
+            name,
+        })
+        .where(eq(teams.id, teamId))
+        .returning();
+    return team;
+};
+
 export const getTeam = async (teamId: Team["id"]) => {
     const [team] = await db
         .select()

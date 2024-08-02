@@ -11,7 +11,20 @@ interface InviteInput {
     teamId: string;
     expireAt: Date;
     limit: number;
+    count?: number;
 }
+
+const isInviteActive = (invite: InviteInput) => {
+    if (!!invite?.count && invite.count >= invite.limit) {
+        return false;
+    }
+
+    if (invite.expireAt <= new Date()) {
+        return false;
+    }
+
+    return true;
+};
 
 export const createInvite = async (invite: InviteInput) => {
     const session = await auth();
@@ -23,6 +36,8 @@ export const createInvite = async (invite: InviteInput) => {
         session.user.name ?? session.user.email ?? session.user.id;
     const expireAt = new Date(invite.expireAt);
 
+    const active = isInviteActive(invite);
+
     const [created] = await db
         .insert(invites)
         .values({
@@ -30,7 +45,7 @@ export const createInvite = async (invite: InviteInput) => {
             createdBy: createdBy,
             limit: invite.limit,
             expireAt: expireAt,
-            active: true,
+            active,
         })
         .returning();
 
@@ -38,7 +53,15 @@ export const createInvite = async (invite: InviteInput) => {
 };
 
 export const getInvites = async (teamId: string) => {
-    return await db.select().from(invites).where(eq(invites.teamId, teamId));
+    const inviteList = await db
+        .select()
+        .from(invites)
+        .where(eq(invites.teamId, teamId));
+
+    return inviteList.map((invite) => ({
+        ...invite,
+        active: isInviteActive(invite),
+    }));
 };
 
 export const deleteInvite = async (id: string) => {
@@ -75,21 +98,20 @@ export const acceptInvite = async (teamId: string, token: string) => {
     });
 };
 
-export const setInviteActivity = async (id: string, isActive: boolean) => {
-    return await db
-        .update(invites)
-        .set({ active: isActive })
-        .where(eq(invites.id, id))
-        .returning();
-};
-
 const getInviteByToken = async (token: string) => {
     const [invite] = await db
         .select()
         .from(invites)
         .where(eq(invites.token, token))
         .limit(1);
-    return invite;
+
+    if (!invite) {
+        return;
+    }
+    return {
+        ...invite,
+        active: isInviteActive(invite),
+    };
 };
 
 export const validateInvite = async (
@@ -129,14 +151,12 @@ export const validateInvite = async (
     }
 
     if (invite.expireAt < new Date()) {
-        await setInviteActivity(invite.id, false);
         return {
             error: "invite has expired",
         };
     }
 
     if (invite.limit <= invite.count) {
-        await setInviteActivity(invite.id, false);
         return {
             error: "invite limit reached",
         };
