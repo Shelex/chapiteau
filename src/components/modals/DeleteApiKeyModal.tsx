@@ -10,6 +10,7 @@ import {
 } from "@nextui-org/modal";
 import { Tooltip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { deleteApiKey as deleteAoiKeyServer } from "~/server/queries";
 
@@ -29,7 +30,11 @@ export default function DeleteApiKey({ keyId, isAdmin }: DeleteApiKeyProps) {
         if (!keyId) {
             return;
         }
-        await deleteAoiKeyServer(keyId);
+        const [deleted] = await deleteAoiKeyServer(keyId);
+        deleted
+            ? toast.success(`Api key ${deleted.name} deleted successfully`)
+            : toast.error("Failed to delete api key");
+
         router.refresh();
     };
 

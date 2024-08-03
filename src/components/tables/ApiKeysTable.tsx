@@ -1,6 +1,5 @@
 "use client";
 import {
-    Snippet,
     Table,
     TableBody,
     TableCell,
@@ -26,25 +25,11 @@ const ApiKeysTable: React.FC<ApiKeysTableProps> = ({
     team,
     isAdmin,
 }) => {
-    const [newToken, setNewToken] = React.useState<string | null>(null);
-
     return (
         <div>
             {team && (
                 <div className="m-2 float-end">
-                    <ApiKeyModal
-                        team={team}
-                        action="create"
-                        onChange={setNewToken}
-                    />
-                </div>
-            )}
-            {newToken && (
-                <div className="flex flex-row justify-center">
-                    <p>Please copy your api key:</p>
-                    <Snippet color="success" hideSymbol>
-                        {newToken}
-                    </Snippet>
+                    <ApiKeyModal team={team} action="create" />
                 </div>
             )}
             <Table title="Api Keys" isStriped>

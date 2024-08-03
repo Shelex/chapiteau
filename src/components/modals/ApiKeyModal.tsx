@@ -15,10 +15,11 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
-import { Button, DatePicker, Input, Tooltip } from "@nextui-org/react";
+import { Button, DatePicker, Input, Snippet, Tooltip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { type ApiKey, type Team } from "~/server/db/schema";
@@ -39,7 +40,6 @@ type ApiKeyAction = "create" | "edit";
 interface ApiKeyModalProps {
     team: Team;
     apiKey?: Omit<ApiKey, "token" | "teamId">;
-    onChange?: (data: string) => void;
     action: ApiKeyAction;
 }
 
@@ -71,7 +71,7 @@ const configuration = {
     },
 };
 
-const ApiKeyModal = ({ team, onChange, action, apiKey }: ApiKeyModalProps) => {
+const ApiKeyModal = ({ team, action, apiKey }: ApiKeyModalProps) => {
     const router = useRouter();
 
     const form = useForm<ApiKeyInput>({
@@ -104,33 +104,51 @@ const ApiKeyModal = ({ team, onChange, action, apiKey }: ApiKeyModalProps) => {
             },
             apiKey?.id ?? ""
         );
+
         if (!result) {
+            toast.error("Failed to create api key");
             return;
         }
 
-        onChange?.(action === "create" ? result.token : result.id) ??
-            router.refresh();
+        router.refresh();
         onClose?.();
         form.reset();
+        action === "create" &&
+            toast.success("Api key created successfully", {
+                description: (
+                    <div>
+                        <p>Please copy your api key:</p>
+                        <Snippet
+                            style={{
+                                maxWidth: "80%",
+                                overflowX: "scroll",
+                            }}
+                            color="success"
+                            hideSymbol
+                        >
+                            {result.token}
+                        </Snippet>
+                    </div>
+                ),
+            });
+        action === "edit" && toast.success("Api key updated successfully");
     }
 
     return (
         <div>
-            <div className="flex flex-row">
-                <Tooltip
+            <Tooltip
+                color={action === "create" ? "success" : "warning"}
+                content={`${action} api key`}
+                placement="left"
+            >
+                <Button
+                    className="w-full"
                     color={action === "create" ? "success" : "warning"}
-                    content={`${action} api key`}
-                    placement="left"
+                    onPress={onOpen}
                 >
-                    <Button
-                        className="w-full"
-                        color={action === "create" ? "success" : "warning"}
-                        onPress={onOpen}
-                    >
-                        {action === "create" ? <PlusIcon /> : <EditIcon />}
-                    </Button>
-                </Tooltip>
-            </div>
+                    {action === "create" ? <PlusIcon /> : <EditIcon />}
+                </Button>
+            </Tooltip>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
                     {(onClose) => (
