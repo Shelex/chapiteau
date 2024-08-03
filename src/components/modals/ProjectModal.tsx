@@ -14,6 +14,7 @@ import { Tooltip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { EditIcon } from "~/components/icons/EditIcon";
@@ -80,12 +81,14 @@ const ProjectModal = ({
             action === "create" ? teamId : projectId ?? ""
         );
         if (!result) {
+            toast.error(`Failed to ${action} project`);
             return;
         }
 
         onChange?.(teamId) ?? router.refresh();
         onClose?.();
         form.reset();
+        toast.success(`Successfully ${action}d project ${values.name}`);
     }
 
     return (
@@ -96,7 +99,7 @@ const ProjectModal = ({
                 placement="right"
             >
                 <Button
-                    className="max-w-[30px]"
+                    size={action === "create" ? "md" : "sm"}
                     color={action === "create" ? "success" : "warning"}
                     onPress={onOpen}
                 >

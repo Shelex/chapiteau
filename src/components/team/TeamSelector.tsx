@@ -1,6 +1,7 @@
 "use client";
 import { type SharedSelection } from "@nextui-org/react";
 import { Select, SelectItem } from "@nextui-org/select";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 import { type Team } from "~/server/db/schema";
@@ -12,6 +13,7 @@ interface TeamSelectorProps {
 
 const TeamSelector = ({ current, onChangedTeam }: TeamSelectorProps) => {
     const [teams, setTeams] = useState<Team[]>([]);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchTeams = () =>
@@ -35,6 +37,7 @@ const TeamSelector = ({ current, onChangedTeam }: TeamSelectorProps) => {
         const value = selection.currentKey?.trim();
         localStorage.setItem("selectedTeam", value ?? "");
         onChangedTeam?.(value ?? "");
+        router.push("/");
     };
 
     return (

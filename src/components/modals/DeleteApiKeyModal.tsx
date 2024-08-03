@@ -48,7 +48,7 @@ export default function DeleteApiKey({ keyId, isAdmin }: DeleteApiKeyProps) {
                 >
                     {isAdmin && (
                         <Button
-                            className="w-full"
+                            size="sm"
                             color="danger"
                             onPress={onOpen}
                         >

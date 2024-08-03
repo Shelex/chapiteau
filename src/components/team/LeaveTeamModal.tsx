@@ -51,7 +51,11 @@ export default function LeaveTeam({ userId, teamId, isAdmin }: LeaveTeamProps) {
                     content="leave the team"
                     placement="top"
                 >
-                    <Button className="w-full" color="danger" onPress={onOpen}>
+                    <Button
+                        color="danger"
+                        size="sm"
+                        onPress={onOpen}
+                    >
                         <KickIcon />
                     </Button>
                 </Tooltip>

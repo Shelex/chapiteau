@@ -145,6 +145,7 @@ const ApiKeyModal = ({ team, action, apiKey }: ApiKeyModalProps) => {
                     className="w-full"
                     color={action === "create" ? "success" : "warning"}
                     onPress={onOpen}
+                    size={action === "create" ? "md" : "sm"}
                 >
                     {action === "create" ? <PlusIcon /> : <EditIcon />}
                 </Button>

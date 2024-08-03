@@ -1,8 +1,20 @@
 "use server";
 import { asc, desc, eq } from "drizzle-orm";
 
+import { auth } from "~/auth";
+
 import { db } from "../db";
-import { type Project, projects, runs, type Team } from "../db/schema";
+import {
+    files,
+    type Project,
+    projects,
+    runs,
+    type Team,
+    testAttachments,
+    tests,
+} from "../db/schema";
+import { clearFolderRecursively } from "./fs";
+import { verifyMembership } from "./users";
 
 export const createProject = async (name: string, teamId: string) => {
     const [project] = await db
@@ -29,11 +41,11 @@ export const renameProject = async (name: string, projectId?: string) => {
     return project;
 };
 
-export const getProjects = async (orgId: Team["id"]) => {
+export const getProjects = async (teamId: Team["id"]) => {
     return await db
         .select()
         .from(projects)
-        .where(eq(projects.teamId, orgId))
+        .where(eq(projects.teamId, teamId))
         .orderBy(asc(projects.createdAt));
 };
 
@@ -57,4 +69,46 @@ export const getProjectDashboard = async (projectId: Project["id"]) => {
         project: project,
         runs: projectRuns,
     };
+};
+
+export const deleteProject = async (
+    teamId: Team["id"],
+    projectId: Project["id"],
+    userIsAdmin?: boolean
+) => {
+    if (userIsAdmin === undefined) {
+        const session = await auth();
+        const { isAdmin } = await verifyMembership(session?.user?.id, teamId);
+        userIsAdmin = isAdmin;
+    }
+
+    if (!userIsAdmin) {
+        return { error: "Unauthorized" };
+    }
+
+    const [project] = await db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, projectId));
+
+    if (!project) {
+        return {
+            error: "Project not found",
+        };
+    }
+
+    await db.transaction(async (tx) => {
+        await tx
+            .delete(testAttachments)
+            .where(eq(testAttachments.projectId, projectId));
+        await tx.delete(tests).where(eq(tests.projectId, projectId));
+        await tx.delete(files).where(eq(files.projectId, projectId));
+        await tx.delete(runs).where(eq(runs.projectId, projectId));
+        await tx.delete(projects).where(eq(projects.id, projectId));
+        // clear reports
+        const path = `${process.cwd()}/reports/${project?.teamId}/${
+            project?.id
+        }`;
+        clearFolderRecursively(path);
+    });
 };

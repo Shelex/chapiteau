@@ -17,12 +17,14 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
-import { type DateValue, Tooltip } from "@nextui-org/react";
+import { type DateValue, Snippet, Tooltip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
+import { env } from "~/env";
 import { type Team } from "~/server/db/schema";
 import { createInvite } from "~/server/queries";
 
@@ -37,7 +39,6 @@ import {
 
 interface CreateInviteModalProps {
     team: Team;
-    onCreated: (token: string) => void;
     isAdmin: boolean;
 }
 
@@ -54,11 +55,7 @@ const inviteInputSchema = z.object({
 
 type InviteInput = z.infer<typeof inviteInputSchema>;
 
-const CreateInviteModal = ({
-    team,
-    onCreated,
-    isAdmin,
-}: CreateInviteModalProps) => {
+const CreateInviteModal = ({ team, isAdmin }: CreateInviteModalProps) => {
     const router = useRouter();
 
     const form = useForm<InviteInput>({
@@ -78,13 +75,30 @@ const CreateInviteModal = ({
             limit: values.limit,
         });
         if (!created) {
+            toast.error("Failed to create invite");
             return;
         }
 
         router.refresh();
-        onCreated(created?.token ?? "");
         onClose?.();
         form.reset();
+        toast.success("Invite created successfully", {
+            description: (
+                <div>
+                    <p>Please share this url with members</p>
+                    <p>you want to invite:</p>
+                    <Snippet
+                        color="success"
+                        size="sm"
+                        style={{
+                            maxWidth: "35%",
+                            overflowX: "scroll",
+                        }}
+                        hideSymbol
+                    >{`${env.NEXT_PUBLIC_AUTH_URL}/api/teams/${team?.id}/invite/${created.token}`}</Snippet>
+                </div>
+            ),
+        });
     }
 
     return (

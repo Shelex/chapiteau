@@ -43,15 +43,15 @@ export default async function RootLayout({
             <body className={inter.className}>
                 <NextUIProvider>
                     <SessionProvider session={session}>
-                        <div className="flex flex-col h-screen">
+                        <div className="flex flex-col">
                             <div className="h-20 shrink-0">
                                 <Header session={session} />
                             </div>
-                            <div className="flex flex-row h-full w-full">
-                                <div className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 overflow-y-scroll overflow-x-scroll">
+                            <div className="flex flex-row w-full h-[calc(100vh-5rem)]">
+                                <div className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 overflow-y-auto overflow-x-auto">
                                     <Sidebar session={session} />
                                 </div>
-                                <main className="flex-auto basis-2/3 h-[calc(100vh-5rem)] px-2 py-2 mx-auto sm:px-6 md:py-6 overflow-y-scroll">
+                                <main className="flex-auto basis-2/3 px-2 py-2 mx-auto sm:px-6 md:py-6 overflow-y-scroll">
                                     {children}
                                 </main>
                                 <Toaster closeButton richColors />

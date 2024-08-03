@@ -5,6 +5,7 @@ import { type Team } from "~/server/db/schema";
 import { getApiKeys, getInvites, getTeamMembers } from "~/server/queries";
 
 import TeamModal from "../modals/TeamModal";
+import DeleteTeamButton from "./DeleteTeamButton";
 
 interface ManageTeamProps {
     userId: string;
@@ -26,17 +27,22 @@ const ManageTeam: React.FC<ManageTeamProps> = async ({
 
     return (
         <div>
-            <h1 className="m-2 h-10">
-                <span className="pl-4">
+            <h1 className="m-2 h-10 flex flex-row gap-2">
+                <span className="basis-11/12 md:pl-32">
                     Team &quot;<span className="font-bold">{team.name}</span>
                     &quot;
                 </span>
                 {isAdmin && (
-                    <div className="w-1/12 m-2 float-end">
+                    <div className="p-2 flex flex-row items-center gap-2">
                         <TeamModal
                             team={team}
                             action="rename"
                             userId={userId}
+                        />
+                        <DeleteTeamButton
+                            team={team}
+                            userId={userId}
+                            isAdmin={isAdmin}
                         />
                     </div>
                 )}

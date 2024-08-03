@@ -1,7 +1,6 @@
 "use client";
 import {
     Chip,
-    Snippet,
     Table,
     TableBody,
     TableCell,
@@ -9,9 +8,8 @@ import {
     TableHeader,
     TableRow,
 } from "@nextui-org/react";
-import React, { useState } from "react";
+import React from "react";
 
-import { env } from "~/env";
 import { type Invite, type Team } from "~/server/db/schema";
 
 import CreateInviteModal from "../modals/CreateInviteModal";
@@ -28,30 +26,14 @@ const InvitesTable: React.FC<InvitesTableProps> = ({
     team,
     isAdmin,
 }) => {
-    const [created, setCreated] = useState("");
     return (
         <div>
             {team && (
                 <div className="m-2 float-end h-10">
-                    <CreateInviteModal
-                        team={team}
-                        onCreated={setCreated}
-                        isAdmin={isAdmin}
-                    />
+                    <CreateInviteModal team={team} isAdmin={isAdmin} />
                 </div>
             )}
-            {created && !!team && (
-                <>
-                    <p>
-                        Please share this url with members you want to invite:
-                    </p>
-                    <Snippet
-                        color="success"
-                        size="sm"
-                        hideSymbol
-                    >{`${env.NEXT_PUBLIC_AUTH_URL}/api/teams/${team?.id}/invite/${created}`}</Snippet>
-                </>
-            )}
+
             <Table title="Invites" isStriped>
                 <TableHeader>
                     <TableColumn>ID</TableColumn>

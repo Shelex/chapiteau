@@ -1,5 +1,5 @@
 "use server";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import { auth } from "~/auth";
 import { isUuid } from "~/lib/utils";
@@ -56,7 +56,8 @@ export const getInvites = async (teamId: string) => {
     const inviteList = await db
         .select()
         .from(invites)
-        .where(eq(invites.teamId, teamId));
+        .where(eq(invites.teamId, teamId))
+        .orderBy(desc(invites.createdAt));
 
     return inviteList.map((invite) => ({
         ...invite,

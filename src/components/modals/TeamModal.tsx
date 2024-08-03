@@ -14,6 +14,7 @@ import { Tooltip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { type Team } from "~/server/db/schema";
@@ -77,12 +78,17 @@ const TeamModal = ({ userId, team, onChange, action }: TeamModalProps) => {
             action === "create" ? userId : team?.id ?? ""
         );
         if (!result) {
+            toast.error(`Failed to ${action} team`);
             return;
         }
 
         onChange?.(result.id) ?? router.refresh();
         onClose?.();
         form.reset();
+        toast.success(`Successfully ${action}d team ${values.name}`);
+        if (action === "create") {
+            router.push("/");
+        }
     }
 
     return (
@@ -93,11 +99,18 @@ const TeamModal = ({ userId, team, onChange, action }: TeamModalProps) => {
                 placement="top"
             >
                 <Button
-                    className="w-full"
+                    className={action === "create" ? "w-full" : ""}
                     color={action === "create" ? "success" : "warning"}
+                    size={action === "create" ? "md" : "sm"}
                     onPress={onOpen}
                 >
-                    {action === "create" ? <PlusIcon /> : <EditIcon />} Team
+                    {action === "create" ? (
+                        <div className="flex flex-row items-center">
+                            <PlusIcon /> Team
+                        </div>
+                    ) : (
+                        <EditIcon />
+                    )}
                 </Button>
             </Tooltip>
 

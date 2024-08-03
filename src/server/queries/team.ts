@@ -3,8 +3,9 @@ import { and, desc, eq, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "../db";
-import { type Team, teamMembers, teams } from "../db/schema";
+import { apiKeys, invites, type Team, teamMembers, teams } from "../db/schema";
 import { type User, users } from "../db/users";
+import { deleteProject, getProjects } from "./project";
 
 export const createTeam = async (name: string, userId: string) => {
     return await db.transaction(async (tx) => {
@@ -118,4 +119,38 @@ export const leaveTeam = async (
         .where(
             and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId))
         );
+};
+
+export const deleteTeam = async (userId: User["id"], teamId: Team["id"]) => {
+    const [member] = await db
+        .select()
+        .from(teamMembers)
+        .where(
+            and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId))
+        );
+
+    if (!member) {
+        return {
+            error: "Member not found",
+        };
+    }
+
+    if (!member.isAdmin) {
+        return {
+            error: "Only admin can delete the team",
+        };
+    }
+
+    return await db.transaction(async (tx) => {
+        const projects = await getProjects(teamId);
+
+        for (const project of projects) {
+            await deleteProject(teamId, project.id, member.isAdmin);
+        }
+
+        await tx.delete(invites).where(eq(invites.teamId, teamId));
+        await tx.delete(apiKeys).where(eq(apiKeys.teamId, teamId));
+        await tx.delete(teamMembers).where(eq(teamMembers.teamId, teamId));
+        await tx.delete(teams).where(eq(teams.id, teamId));
+    });
 };

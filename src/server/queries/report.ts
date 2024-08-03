@@ -1,6 +1,4 @@
 "use server";
-import fs from "node:fs";
-
 import { and, asc, desc, eq, gt, lt, ne } from "drizzle-orm";
 
 import { auth } from "~/auth";
@@ -9,6 +7,7 @@ import { type BuildInfo, type Report } from "~/lib/parser";
 import { db } from "~/server/db";
 import { files, runs, testAttachments, tests } from "~/server/db/schema";
 
+import { clearFolderRecursively } from "./fs";
 import { verifyMembership } from "./users";
 
 interface SaveReportInput {
@@ -227,10 +226,7 @@ export const deleteRun = async (runId: string, teamId: string) => {
             const path = `${process.cwd()}/reports/${teamId}/${
                 run.projectId
             }/${runId}`;
-            fs.existsSync(path) &&
-                fs.rmdirSync(path, {
-                    recursive: true,
-                });
+            clearFolderRecursively(path);
         }
     });
 };

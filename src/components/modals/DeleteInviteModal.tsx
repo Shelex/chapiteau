@@ -40,6 +40,7 @@ export default function DeleteInvite({ inviteId, isAdmin }: DeleteInviteProps) {
                     {isAdmin && (
                         <Button
                             color="danger"
+                            size="sm"
                             disabled={!isAdmin}
                             onPress={onOpen}
                         >

@@ -37,7 +37,7 @@ export default function Sidebar({
     const [enableEditProjects, setEnableEditProjects] = useState(false);
 
     return (
-        <div className="flex-col m-4 h-screen">
+        <div className="flex-col m-4">
             <div className="min-w-full">
                 <TeamSelector
                     current={currentTeam}
@@ -45,14 +45,14 @@ export default function Sidebar({
                 />
             </div>
             <div className="p-1 m-1 flex flex-wrap">
-                <div className="grow p-1">
+                <div className="basis-1/2 p-1">
                     <TeamModal
                         userId={session?.user?.id ?? ""}
                         onChange={onChangedTeam}
                         action="create"
                     />
                 </div>
-                <div className="grow p-1">
+                <div className="basis-1/2 p-1">
                     {currentTeam && (
                         <Link
                             href={`/team/${currentTeam}/`}
@@ -68,7 +68,7 @@ export default function Sidebar({
                 </div>
             </div>
             {currentTeam && (
-                <div className="flex flex-col rounded h-screen">
+                <div className="flex flex-col rounded h-full">
                     <div className="flex flex-wrap justify-between p-2 bg-primary-50 rounded-xl">
                         <div className="flex flex-col h-16">
                             <div className="font-bold">Projects</div>

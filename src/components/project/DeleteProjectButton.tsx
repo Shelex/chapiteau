@@ -8,46 +8,63 @@ import {
     ModalHeader,
     useDisclosure,
 } from "@nextui-org/modal";
+import { Input, Tooltip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 
-import { deleteRun as deleteServerRun } from "~/server/queries";
+import { type Project } from "~/server/db/schema";
+import { deleteProject } from "~/server/queries";
 
-interface DeleteRunButtonProps {
+import { DeleteIcon } from "../icons/DeleteIcon";
+
+interface DeleteProjectButtonProps {
     teamId?: string;
-    runId: string;
+    project?: Project;
+    onDelete?: (teamId: string) => void;
 }
 
-export default function DeleteRunButton({
+export default function DeleteProjectButton({
     teamId,
-    runId,
-}: DeleteRunButtonProps) {
+    project,
+    onDelete,
+}: DeleteProjectButtonProps) {
     const router = useRouter();
+    const [confirm, setConfirm] = useState("");
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-    const deleteRun = async () => {
-        if (!teamId) {
+    const DeleteProject = async () => {
+        if (!project || !teamId) {
             return;
         }
-        const result = await deleteServerRun(runId, teamId);
-        router.refresh();
+        const result = await deleteProject(teamId, project.id);
         if (result?.error) {
-            toast.error("Failed to delete run", {
+            toast.error("Failed to delete project", {
                 description: result.error,
             });
             return;
         }
-
-        toast.success("Run deleted successfully");
+        onDelete?.(teamId);
+        toast.success(
+            `Request to delete project ${project.name} sent successfully`
+        );
+        router.refresh();
+        router.push("/");
     };
 
     return (
         !!teamId && (
             <>
-                <Button color="danger" onPress={onOpen}>
-                    Delete Run
-                </Button>
+                <Tooltip
+                    color="danger"
+                    content="delete project"
+                    placement="bottom"
+                >
+                    <Button size="sm" color="danger" onPress={onOpen}>
+                        <DeleteIcon />
+                    </Button>
+                </Tooltip>
                 <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                     <ModalContent>
                         {(onClose) => (
@@ -62,6 +79,19 @@ export default function DeleteRunButton({
                                         and remove report if it is saved with
                                         our servers.
                                     </p>
+                                    <p>
+                                        Please type project name&nbsp;
+                                        <strong className="break-all">
+                                            {project?.name}
+                                        </strong>
+                                        &nbsp;to confirm:
+                                    </p>
+                                    <Input
+                                        isRequired
+                                        label="Confirm"
+                                        value={confirm}
+                                        onValueChange={setConfirm}
+                                    />
                                 </ModalBody>
                                 <ModalFooter>
                                     <Button
@@ -73,8 +103,9 @@ export default function DeleteRunButton({
                                     </Button>
                                     <Button
                                         color="danger"
+                                        isDisabled={confirm !== project?.name}
                                         onPress={onClose}
-                                        onClick={deleteRun}
+                                        onClick={DeleteProject}
                                     >
                                         Sure, Delete
                                     </Button>
