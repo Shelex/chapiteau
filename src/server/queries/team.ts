@@ -1,5 +1,5 @@
 "use server";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "../db";
@@ -81,4 +81,41 @@ export const changeMemberAdminStatus = async (
             and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId))
         )
         .returning();
+};
+
+export const leaveTeam = async (
+    teamId: Team["id"],
+    userId: User["id"],
+    isAdmin: boolean
+) => {
+    if (!teamId || !userId) {
+        return { error: "Member not found" };
+    }
+
+    // prohibit leaving team if user is the only admin
+    if (isAdmin) {
+        const [otherAdmin] = await db
+            .select({
+                id: teamMembers.id,
+            })
+            .from(teamMembers)
+            .where(
+                and(
+                    eq(teamMembers.teamId, teamId),
+                    ne(teamMembers.userId, userId),
+                    eq(teamMembers.isAdmin, true)
+                )
+            )
+            .limit(1);
+
+        if (!otherAdmin) {
+            return { error: "Cannot leave team as a single admin" };
+        }
+    }
+
+    await db
+        .delete(teamMembers)
+        .where(
+            and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId))
+        );
 };

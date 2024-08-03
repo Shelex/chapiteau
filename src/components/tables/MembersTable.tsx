@@ -16,6 +16,8 @@ import { Switch } from "~/components/ui/switch";
 import { type Team } from "~/server/db/schema";
 import { changeMemberAdminStatus } from "~/server/queries";
 
+import LeaveTeam from "../team/LeaveTeamModal";
+
 interface Member {
     user: {
         id: string;
@@ -99,12 +101,17 @@ const TeamMembersTable: React.FC<MembersTableProps> = ({
                     <TableColumn>Email</TableColumn>
                     <TableColumn>isAdmin</TableColumn>
                     <TableColumn>Added At</TableColumn>
+                    <TableColumn>Actions</TableColumn>
                 </TableHeader>
                 <TableBody>
                     {members.map(({ user, member }) => (
                         <TableRow key={user?.id}>
-                            <TableCell className="w-3/12">{user?.name}</TableCell>
-                            <TableCell className="w-4/12">{user?.email}</TableCell>
+                            <TableCell className="w-3/12">
+                                {user?.name}
+                            </TableCell>
+                            <TableCell className="w-4/12">
+                                {user?.email}
+                            </TableCell>
                             <TableCell className="w-1/12">
                                 <Status
                                     teamMember={{ user, member }}
@@ -113,6 +120,13 @@ const TeamMembersTable: React.FC<MembersTableProps> = ({
                             </TableCell>
                             <TableCell className="w-2/12">
                                 {member?.createdAt?.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="w-1/12">
+                                {(isAdmin || session.data?.user.id === user?.id) && <LeaveTeam
+                                    teamId={team.id}
+                                    userId={user?.id ?? ""}
+                                    isAdmin={member.isAdmin}
+                                />}
                             </TableCell>
                         </TableRow>
                     ))}

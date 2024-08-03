@@ -10,6 +10,7 @@ import { SessionProvider } from "next-auth/react";
 import { auth } from "~/auth";
 import Header from "~/components/layout/Header";
 import Sidebar from "~/components/layout/Sidebar";
+import { Toaster } from "~/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,7 +42,7 @@ export default async function RootLayout({
             ></Script>
             <body className={inter.className}>
                 <NextUIProvider>
-                    <SessionProvider basePath={"/api/auth"} session={session}>
+                    <SessionProvider session={session}>
                         <div className="flex flex-col h-screen">
                             <div className="h-20 shrink-0">
                                 <Header session={session} />
@@ -53,6 +54,7 @@ export default async function RootLayout({
                                 <main className="flex-auto basis-2/3 h-[calc(100vh-5rem)] px-2 py-2 mx-auto sm:px-6 md:py-6 overflow-y-scroll">
                                     {children}
                                 </main>
+                                <Toaster closeButton richColors />
                             </div>
                         </div>
                     </SessionProvider>
