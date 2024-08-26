@@ -19,7 +19,7 @@ import { z } from "zod";
 
 import { type Team } from "~/server/db/schema";
 import { type User } from "~/server/db/users";
-import { createTeam, renameTeam } from "~/server/queries";
+import { createTeam, renameTeam, withError } from "~/server/queries";
 
 import { EditIcon } from "../icons/EditIcon";
 import { PlusIcon } from "../icons/PlusIcon";
@@ -73,11 +73,13 @@ const TeamModal = ({ userId, team, onChange, action }: TeamModalProps) => {
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
     async function onSubmit(values: TeamInput) {
-        const result = await config.action(
-            values.name,
-            action === "create" ? userId : team?.id ?? ""
+        const { result, error } = await withError(
+            config.action(
+                values.name,
+                action === "create" ? userId : team?.id ?? ""
+            )
         );
-        if (!result) {
+        if (error ?? !result) {
             toast.error(`Failed to ${action} team`);
             return;
         }
@@ -96,7 +98,7 @@ const TeamModal = ({ userId, team, onChange, action }: TeamModalProps) => {
             <Tooltip
                 color={action === "create" ? "success" : "warning"}
                 content={`${action} team`}
-                placement="top"
+                placement="bottom"
             >
                 <Button
                     className={action === "create" ? "w-full" : ""}

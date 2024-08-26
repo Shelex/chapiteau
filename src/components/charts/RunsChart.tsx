@@ -1,4 +1,6 @@
 "use client";
+import { Accordion, AccordionItem, type Selection } from "@nextui-org/react";
+import { useState } from "react";
 import { Area, AreaChart, XAxis } from "recharts";
 
 import {
@@ -42,6 +44,12 @@ interface RunsChartProps {
 }
 
 export function RunsChart({ runs }: RunsChartProps) {
+    const [expanded, setExpanded] = useState(true);
+
+    const onSelectionChange = (keys: Selection) => {
+        setExpanded(typeof keys === "object" && !!keys?.size);
+    };
+
     const getPercentage = (value: number, total: number) =>
         Math.round((value / total) * 100);
 
@@ -59,12 +67,17 @@ export function RunsChart({ runs }: RunsChartProps) {
     }));
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Runs</CardTitle>
-                <CardDescription>Showing run details</CardDescription>
-            </CardHeader>
-            <CardContent>
+        <Accordion
+            fullWidth
+            variant="bordered"
+            defaultSelectedKeys={"all"}
+            onSelectionChange={onSelectionChange}
+        >
+            <AccordionItem
+                key="chart"
+                title="Runs trend"
+                subtitle={`Press to ${expanded ? "collapse" : "expand"}`}
+            >
                 <ChartContainer config={chartConfig}>
                     <AreaChart
                         accessibilityLayer
@@ -109,9 +122,13 @@ export function RunsChart({ runs }: RunsChartProps) {
                                                 name as keyof typeof chartConfig
                                             ]?.label || name}
                                             <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
-                                                {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
-                                                {item.payload[`${name}Count`]} (
-                                                {value}%)
+                                                {
+                                                    item.payload[
+                                                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                                                        `${name}Count`
+                                                    ]
+                                                }{" "}
+                                                ({value}%)
                                             </div>
                                             {/* Add this after the last item */}
                                             {index === 3 && (
@@ -159,7 +176,7 @@ export function RunsChart({ runs }: RunsChartProps) {
                         <ChartLegend content={<ChartLegendContent />} />
                     </AreaChart>
                 </ChartContainer>
-            </CardContent>
-        </Card>
+            </AccordionItem>
+        </Accordion>
     );
 }

@@ -1,5 +1,5 @@
 "use server";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, count, desc, eq } from "drizzle-orm";
 
 import { auth } from "~/auth";
 
@@ -49,25 +49,34 @@ export const getProjects = async (teamId: Team["id"]) => {
         .orderBy(asc(projects.createdAt));
 };
 
-export const getProjectDashboard = async (projectId: Project["id"]) => {
-    const project = (
-        await db
-            .select()
-            .from(projects)
-            .where(eq(projects.id, projectId))
-            .limit(1)
-    ).at(0);
+export const getProjectDashboard = async (
+    projectId: Project["id"],
+    limit = 20,
+    offset = 0
+) => {
+    const [project] = await db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, projectId))
+        .limit(1);
 
     const projectRuns = await db
         .select()
         .from(runs)
         .where(eq(runs.projectId, projectId))
         .orderBy(desc(runs.createdAt))
-        .limit(20);
+        .limit(limit)
+        .offset(offset);
+
+    const [runsCount] = await db
+        .select({ count: count() })
+        .from(runs)
+        .where(eq(runs.projectId, projectId));
 
     return {
         project: project,
         runs: projectRuns,
+        total: runsCount?.count ?? 0,
     };
 };
 

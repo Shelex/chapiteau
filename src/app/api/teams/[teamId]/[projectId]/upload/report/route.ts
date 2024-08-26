@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import path from "path";
 
 import { type BuildInfo, parseHtmlReport } from "~/lib/parser";
-import { saveReport } from "~/server/queries";
+import { saveReport, withError } from "~/server/queries";
 
 import { verifyApiKey } from "../middleware";
 
@@ -50,18 +50,24 @@ export async function POST(
         );
     }
 
-    const createdRun = await saveReport({
-        createdBy: apiKeyName,
-        teamId: params.teamId,
-        projectId: params.projectId,
-        report: { ...report, ...searchParams },
-        saveReportLocally: true,
-    });
+    const { result: createdRun, error: saveReportError } = await withError(
+        saveReport({
+            createdBy: apiKeyName,
+            teamId: params.teamId,
+            projectId: params.projectId,
+            report: { ...report, ...searchParams },
+            saveReportLocally: true,
+        })
+    );
 
-    if (!createdRun) {
+    if (saveReportError ?? !createdRun) {
         return NextResponse.json(
-            { error: "Failed to save report data" },
-            { status: 500 }
+            {
+                error: `Failed to save report data: ${
+                    saveReportError?.message ?? ""
+                }`,
+            },
+            { status: 400 }
         );
     }
 
@@ -97,7 +103,7 @@ export async function POST(
         console.error("Failed to save report files", e);
         return NextResponse.json(
             { error: "Failed to save report files" },
-            { status: 500 }
+            { status: 400 }
         );
     }
 

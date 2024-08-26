@@ -17,7 +17,11 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
         redirect(`/api/auth/signin?callbackUrl=/project/${params.id}`);
     }
 
-    const { project, runs } = await getProjectDashboard(params.id ?? "");
+    const { project, runs, total } = await getProjectDashboard(
+        params.id ?? "",
+        20,
+        0
+    );
     const { isAdmin, isMember } = await verifyMembership(
         session.user.id,
         project?.teamId
@@ -29,7 +33,7 @@ export default async function ProjectPage({ params }: Readonly<ProjectProps>) {
 
     return (
         <div className="text-center">
-            {project && <ProjectView project={project} />}
+            {project && <ProjectView project={project} totalRuns={total} />}
             {project?.teamId && (
                 <div>
                     {runs?.length > 1 && <RunsChart runs={runs} />}

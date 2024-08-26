@@ -19,7 +19,7 @@ import { z } from "zod";
 
 import { EditIcon } from "~/components/icons/EditIcon";
 import { PlusIcon } from "~/components/icons/PlusIcon";
-import { createProject, renameProject } from "~/server/queries";
+import { createProject, renameProject, withError } from "~/server/queries";
 
 import {
     Form,
@@ -76,11 +76,14 @@ const ProjectModal = ({
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
     async function onSubmit(values: ProjectInput) {
-        const result = await config.action(
-            values.name,
-            action === "create" ? teamId : projectId ?? ""
+        const { result, error } = await withError(
+            config.action(
+                values.name,
+                action === "create" ? teamId : projectId ?? ""
+            )
         );
-        if (!result) {
+
+        if (error ?? !result) {
             toast.error(`Failed to ${action} project`);
             return;
         }
@@ -89,6 +92,9 @@ const ProjectModal = ({
         onClose?.();
         form.reset();
         toast.success(`Successfully ${action}d project ${values.name}`);
+        if (action === "create") {
+            router.push(`/project/${result.id}`);
+        }
     }
 
     return (

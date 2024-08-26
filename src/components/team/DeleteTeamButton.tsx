@@ -46,6 +46,7 @@ export default function DeleteTeamButton({
             return;
         }
         toast.success(`Request to delete team ${team.name} sent successfully`);
+        router.push("/");
         localStorage.removeItem("selectedTeam");
         router.refresh();
     };

@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { type BuildInfo,parseHtmlReport } from "~/lib/parser";
-import { saveReport } from "~/server/queries";
+import { type BuildInfo, parseHtmlReport } from "~/lib/parser";
+import { saveReport, withError } from "~/server/queries";
 
 import { verifyApiKey } from "../middleware";
 
@@ -47,18 +47,24 @@ export async function POST(
         );
     }
 
-    const createdRun = await saveReport({
-        createdBy: apiKeyName,
-        teamId: params.teamId,
-        projectId: params.projectId,
-        report: { ...report, ...searchParams },
-        saveReportLocally: false,
-    });
+    const { result: createdRun, error: saveReportError } = await withError(
+        saveReport({
+            createdBy: apiKeyName,
+            teamId: params.teamId,
+            projectId: params.projectId,
+            report: { ...report, ...searchParams },
+            saveReportLocally: false,
+        })
+    );
 
-    if (!createdRun) {
+    if (saveReportError ?? !createdRun) {
         return NextResponse.json(
-            { error: "Failed to save report data" },
-            { status: 500 }
+            {
+                error: `Failed to save report data ${
+                    saveReportError?.message ?? ""
+                }`,
+            },
+            { status: 400 }
         );
     }
 

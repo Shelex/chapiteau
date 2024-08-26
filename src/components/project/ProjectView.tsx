@@ -6,9 +6,10 @@ import { type Project } from "~/server/db/schema";
 
 interface ProjectProps {
     project: Project;
+    totalRuns?: number;
 }
 
-export default function ProjectView({ project }: ProjectProps) {
+export default function ProjectView({ project, totalRuns }: ProjectProps) {
     if (!project) {
         return null;
     }
@@ -18,6 +19,7 @@ export default function ProjectView({ project }: ProjectProps) {
                 Project &quot;{project.name}&quot;
             </h2>
             <p>CreatedAt: {project.createdAt.toLocaleString()}</p>
+            <p>Total runs: {totalRuns ?? 0}</p>
             <p>Link for chapiteau CLI:</p>
             <Snippet
                 size="sm"
