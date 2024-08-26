@@ -2,9 +2,9 @@
 import { and, desc, eq, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
-import { db } from "../db";
+import { db } from "~/server/db";
 import { apiKeys, invites, type Team, teamMembers, teams } from "../db/schema";
-import { type User, users } from "../db/users";
+import { type User, users } from "~/server/db/users";
 import { deleteProject, getProjects } from "./project";
 
 export const createTeam = async (name: string, userId: string) => {

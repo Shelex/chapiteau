@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { withError } from "~/lib";
 import { type Project } from "~/server/db/schema";
 import { deleteProject } from "~/server/queries";
 
@@ -38,10 +39,12 @@ export default function DeleteProjectButton({
         if (!project || !teamId) {
             return;
         }
-        const result = await deleteProject(teamId, project.id);
-        if (result?.error) {
+        const { result, error } = await withError(
+            deleteProject(teamId, project.id)
+        );
+        if (result?.error ?? error) {
             toast.error("Failed to delete project", {
-                description: result.error,
+                description: result?.error ?? error?.message ?? "",
             });
             return;
         }

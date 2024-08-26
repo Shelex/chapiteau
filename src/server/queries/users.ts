@@ -4,7 +4,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { db } from "~/server/db";
 import { type User, users } from "~/server/db/users";
 
-import { type Team, teamMembers, teams } from "../db/schema";
+import { type Team, teamMembers, teams } from "~/server/db/schema";
 
 export const deleteUser = async (id: string) => {
     return await db.delete(users).where(eq(users.id, id)).returning();

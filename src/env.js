@@ -24,6 +24,13 @@ export const env = createEnv({
         ),
         AUTH_GITHUB_ID: z.string(),
         AUTH_GITHUB_SECRET: z.string(),
+        REPORT_PERSIST: z.enum(["fs", "s3"]).default("fs").optional(),
+        S3_ENDPOINT: z.string().optional(),
+        S3_BUCKET: z.string().optional(),
+        S3_ACCESS_KEY: z.string().optional(),
+        S3_SECRET_KEY: z.string().optional(),
+        S3_REGION: z.string().optional(),
+        S3_PORT: z.number().optional(),
     },
 
     /**
@@ -47,6 +54,13 @@ export const env = createEnv({
         AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
         AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
         AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
+        REPORT_PERSIST: process.env.REPORT_PERSIST,
+        S3_ENDPOINT: process.env.S3_ENDPOINT,
+        S3_BUCKET: process.env.S3_BUCKET,
+        S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
+        S3_SECRET_KEY: process.env.S3_SECRET_KEY,
+        S3_REGION: process.env.S3_REGION,
+        S3_PORT: process.env.S3_PORT,
     },
     /**
      * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

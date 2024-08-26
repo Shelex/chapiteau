@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { withError } from "~/lib";
 import { type Team } from "~/server/db/schema";
 import { deleteTeam } from "~/server/queries";
 
@@ -38,10 +39,10 @@ export default function DeleteTeamButton({
         if (!userId || !team || !isAdmin) {
             return;
         }
-        const result = await deleteTeam(userId, team.id);
-        if (result?.error) {
+        const { result, error } = await withError(deleteTeam(userId, team.id));
+        if (result?.error ?? error) {
             toast.error("Failed to delete team", {
-                description: result.error,
+                description: result?.error ?? error?.message ?? "",
             });
             return;
         }

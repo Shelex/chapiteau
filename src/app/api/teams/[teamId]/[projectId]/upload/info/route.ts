@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { type BuildInfo, parseHtmlReport } from "~/lib";
-import { saveReport, withError } from "~/server/queries";
+import { type BuildInfo, parseHtmlReport, withError } from "~/lib";
+import { saveReport } from "~/server/queries";
 
 import { verifyApiKey } from "../middleware";
 

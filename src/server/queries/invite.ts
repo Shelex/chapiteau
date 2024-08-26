@@ -4,8 +4,8 @@ import { desc, eq } from "drizzle-orm";
 import { auth } from "~/auth";
 import { isUuid } from "~/lib";
 
-import { db } from "../db";
-import { type Invite, invites, teamMembers } from "../db/schema";
+import { db } from "~/server/db";
+import { type Invite, invites, teamMembers } from "~/server/db/schema";
 
 interface InviteInput {
     teamId: string;

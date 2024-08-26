@@ -17,9 +17,10 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { withError } from "~/lib";
 import { type Team } from "~/server/db/schema";
 import { type User } from "~/server/db/users";
-import { createTeam, renameTeam, withError } from "~/server/queries";
+import { createTeam, renameTeam } from "~/server/queries";
 
 import { EditIcon } from "../icons/EditIcon";
 import { PlusIcon } from "../icons/PlusIcon";

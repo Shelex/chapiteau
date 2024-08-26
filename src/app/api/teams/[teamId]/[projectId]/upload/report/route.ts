@@ -1,9 +1,8 @@
-import { promises as fs } from "fs";
 import { type NextRequest, NextResponse } from "next/server";
-import path from "path";
 
-import { type BuildInfo, parseHtmlReport } from "~/lib";
-import { saveReport, withError } from "~/server/queries";
+import { type BuildInfo, parseHtmlReport, withError } from "~/lib";
+import { saveReport } from "~/server/queries";
+import { reportHandler } from "~/server/reports";
 
 import { verifyApiKey } from "../middleware";
 
@@ -71,38 +70,21 @@ export async function POST(
         );
     }
 
-    const baseDestination = path.join(
-        process.cwd(),
-        "reports",
-        params.teamId,
-        params.projectId,
-        `${createdRun.numericId}`
+    const { error: persistReportError } = await withError(
+        reportHandler.write(
+            params.teamId,
+            params.projectId,
+            createdRun.numericId,
+            files
+        )
     );
 
-    console.log(
-        `going to save report for run ${createdRun.id} to ${baseDestination}`
-    );
-
-    try {
-        await fs.mkdir(baseDestination, { recursive: true });
-
-        for (const file of files) {
-            const arrayBuffer = await file.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-            const relativePath = file.name;
-            const fullDestinationPath = path.join(
-                baseDestination,
-                relativePath
-            );
-            const destinationDir = path.dirname(fullDestinationPath);
-
-            await fs.mkdir(destinationDir, { recursive: true });
-            await fs.writeFile(fullDestinationPath, buffer);
-        }
-    } catch (e) {
-        console.error("Failed to save report files", e);
+    if (persistReportError) {
+        console.error("Failed to save report files", persistReportError);
         return NextResponse.json(
-            { error: "Failed to save report files" },
+            {
+                error: `Failed to save report files ${persistReportError.message}`,
+            },
             { status: 400 }
         );
     }

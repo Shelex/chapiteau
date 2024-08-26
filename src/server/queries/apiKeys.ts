@@ -4,8 +4,8 @@ import { desc, eq } from "drizzle-orm";
 import { auth } from "~/auth";
 import { isUuid } from "~/lib";
 
-import { db } from "../db";
-import { apiKeys } from "../db/schema";
+import { db } from "~/server/db";
+import { apiKeys } from "~/server/db/schema";
 
 interface ApiKeyInput {
     name: string;

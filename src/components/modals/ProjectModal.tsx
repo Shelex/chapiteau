@@ -19,7 +19,8 @@ import { z } from "zod";
 
 import { EditIcon } from "~/components/icons/EditIcon";
 import { PlusIcon } from "~/components/icons/PlusIcon";
-import { createProject, renameProject, withError } from "~/server/queries";
+import { withError } from "~/lib";
+import { createProject, renameProject } from "~/server/queries";
 
 import {
     Form,

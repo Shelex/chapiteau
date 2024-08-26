@@ -6,9 +6,10 @@ import { env } from "~/env";
 import { type BuildInfo, type Report } from "~/lib";
 import { db } from "~/server/db";
 import { files, runs, testAttachments, tests } from "~/server/db/schema";
+import { reportHandler } from "~/server/reports";
 
-import { clearFolderRecursively } from "./fs";
 import { verifyMembership } from "./users";
+import path from "node:path";
 
 interface SaveReportInput {
     createdBy: string;
@@ -223,10 +224,9 @@ export const deleteRun = async (runId: string, teamId: string) => {
         await tx.delete(files).where(eq(files.runId, runId));
         await tx.delete(runs).where(eq(runs.id, runId));
         if (run.reportUrl?.includes(env.NEXT_PUBLIC_AUTH_URL)) {
-            const path = `${process.cwd()}/reports/${teamId}/${
-                run.projectId
-            }/${runId}`;
-            clearFolderRecursively(path);
+            await reportHandler.clear(
+                path.join(teamId, run.projectId, run.numericId.toString())
+            );
         }
     });
 };

@@ -2,8 +2,9 @@
 import { asc, count, desc, eq } from "drizzle-orm";
 
 import { auth } from "~/auth";
+import { reportHandler } from "~/server/reports";
 
-import { db } from "../db";
+import { db } from "~/server/db";
 import {
     files,
     type Project,
@@ -12,9 +13,9 @@ import {
     type Team,
     testAttachments,
     tests,
-} from "../db/schema";
-import { clearFolderRecursively } from "./fs";
+} from "~/server/db/schema";
 import { verifyMembership } from "./users";
+import path from "node:path";
 
 export const createProject = async (name: string, teamId: string) => {
     const [project] = await db
@@ -115,9 +116,6 @@ export const deleteProject = async (
         await tx.delete(runs).where(eq(runs.projectId, projectId));
         await tx.delete(projects).where(eq(projects.id, projectId));
         // clear reports
-        const path = `${process.cwd()}/reports/${project?.teamId}/${
-            project?.id
-        }`;
-        clearFolderRecursively(path);
+        await reportHandler?.clear(path.join(project.teamId, project.id));
     });
 };

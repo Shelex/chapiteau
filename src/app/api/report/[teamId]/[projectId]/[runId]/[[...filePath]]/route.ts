@@ -1,4 +1,3 @@
-import { promises as fs } from "fs";
 import mime from "mime";
 import { redirect } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
@@ -7,6 +6,7 @@ import path from "path";
 import { auth } from "~/auth";
 import { env } from "~/env";
 import { getRunNeighbors, verifyMembership } from "~/server/queries";
+import { reportHandler } from "~/server/reports";
 
 interface Links {
     nextRunId?: string;
@@ -117,20 +117,25 @@ export async function GET(
         return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const targetPath = path.join(
-        process.cwd(),
-        "reports",
-        teamId,
-        projectId,
-        runId,
-        file
-    );
+    const targetPath = path.join(teamId, projectId, runId, file);
 
     try {
         const contentType = mime.getType(path.basename(targetPath));
 
         if (!contentType && !path.extname(targetPath)) {
             return NextResponse.next();
+        }
+
+        const { result: content, error } = await reportHandler.read(
+            targetPath,
+            contentType
+        );
+
+        if (error ?? !content) {
+            return NextResponse.json(
+                { error: `Could not read file ${error?.message ?? ""}` },
+                { status: 404 }
+            );
         }
 
         const headers = {
@@ -146,20 +151,17 @@ export async function GET(
         ) {
             const links =
                 (await getRunNeighbors(projectId, Number(runId))) ?? {};
+
             return new Response(
-                addNav(
-                    await fs.readFile(targetPath, { encoding: "utf-8" }),
-                    env.NEXT_PUBLIC_AUTH_URL,
-                    {
-                        ...params,
-                        ...links,
-                    }
-                ),
+                addNav(content.toString(), env.NEXT_PUBLIC_AUTH_URL, {
+                    ...params,
+                    ...links,
+                }),
                 headers
             );
         }
 
-        return new Response(await fs.readFile(targetPath), headers);
+        return new Response(content, headers);
     } catch (error) {
         return NextResponse.json({ error: "Page not found" }, { status: 404 });
     }
