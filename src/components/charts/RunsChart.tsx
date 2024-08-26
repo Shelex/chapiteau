@@ -4,13 +4,6 @@ import { useState } from "react";
 import { Area, AreaChart, XAxis } from "recharts";
 
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "~/components/ui/card";
-import {
     type ChartConfig,
     ChartContainer,
     ChartLegend,

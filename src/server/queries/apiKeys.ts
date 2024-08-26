@@ -2,7 +2,7 @@
 import { desc, eq } from "drizzle-orm";
 
 import { auth } from "~/auth";
-import { isUuid } from "~/lib/utils";
+import { isUuid } from "~/lib";
 
 import { db } from "../db";
 import { apiKeys } from "../db/schema";

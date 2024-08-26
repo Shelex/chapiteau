@@ -3,7 +3,7 @@ import { and, asc, desc, eq, gt, lt, ne } from "drizzle-orm";
 
 import { auth } from "~/auth";
 import { env } from "~/env";
-import { type BuildInfo, type Report } from "~/lib/parser";
+import { type BuildInfo, type Report } from "~/lib";
 import { db } from "~/server/db";
 import { files, runs, testAttachments, tests } from "~/server/db/schema";
 

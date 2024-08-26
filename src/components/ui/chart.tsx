@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 
-import { cn } from "~/lib/utils";
+import { cn } from "~/lib";
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
@@ -197,8 +197,10 @@ const ChartTooltipContent = React.forwardRef<
                             key
                         );
                         const indicatorColor: string =
+                            color ??
                             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                            color ?? (item?.payload?.fill as string) ?? item?.color;
+                            (item?.payload?.fill as string) ??
+                            item?.color;
 
                         return (
                             <div
