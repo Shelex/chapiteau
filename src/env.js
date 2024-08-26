@@ -24,7 +24,7 @@ export const env = createEnv({
         ),
         AUTH_GITHUB_ID: z.string(),
         AUTH_GITHUB_SECRET: z.string(),
-        REPORT_PERSIST: z.enum(["fs", "s3"]).default("fs").optional(),
+        REPORT_PERSIST: z.enum(["fs", "s3"]).default("fs"),
         S3_ENDPOINT: z.string().optional(),
         S3_BUCKET: z.string().optional(),
         S3_ACCESS_KEY: z.string().optional(),
