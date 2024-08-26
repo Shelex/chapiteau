@@ -3,7 +3,6 @@ import { desc, eq } from "drizzle-orm";
 
 import { auth } from "~/auth";
 import { isUuid } from "~/lib";
-
 import { db } from "~/server/db";
 import { type Invite, invites, teamMembers } from "~/server/db/schema";
 

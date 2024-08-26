@@ -14,7 +14,7 @@ interface ReportHandler {
         targetPath: string,
         contentType?: string | null
     ) => Promise<{
-        result: string | Buffer | null;
+        result?: string | Buffer | null;
         error: Error | null;
     }>;
     clear: (path: string) => Promise<void>;

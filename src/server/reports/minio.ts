@@ -79,23 +79,20 @@ export class MinioPersist {
             return { result: null, error };
         }
 
-        const readStream = new Promise<{
-            content: string | Buffer;
-            error: null;
-        }>((resolve, reject) => {
+        const readStream = new Promise<Buffer>((resolve, reject) => {
             const chunks: Buffer[] = [];
 
-            stream.on("data", (chunk) => {
+            stream.on("data", (chunk: Buffer) => {
                 chunks.push(chunk);
             });
 
             stream.on("end", () => {
                 const fullContent = Buffer.concat(chunks);
-                resolve({ content: fullContent, error: null });
+                resolve(fullContent);
             });
 
             stream.on("error", (error) => {
-                reject({ content: null, error });
+                reject(error);
             });
         });
 
@@ -103,10 +100,10 @@ export class MinioPersist {
 
         return {
             result:
-                (contentType === "text/html"
-                    ? result?.content.toString("utf-8")
-                    : result?.content) ?? null,
-            error: error ?? readError ?? result?.error ?? null,
+                contentType === "text/html"
+                    ? result?.toString("utf-8")
+                    : result,
+            error: error ?? readError ?? null,
         };
     }
 
