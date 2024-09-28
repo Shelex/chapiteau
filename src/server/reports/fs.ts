@@ -48,7 +48,7 @@ const read = async (targetPath: string, contentType?: string | null) => {
     );
 };
 
-export const fsPersist = {
+export const fsStorage = {
     write,
     read,
     clear,

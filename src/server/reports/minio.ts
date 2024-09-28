@@ -38,13 +38,22 @@ const createClient = () => {
     return client;
 };
 
-export class MinioPersist {
+export class S3 {
+    private static instance: S3;
     private client: Client;
     private bucket: string;
 
-    constructor() {
+    private constructor() {
         this.client = createClient();
         this.bucket = env.S3_BUCKET ?? "chapiteau-reports";
+    }
+
+    static getInstance() {
+        if (!S3.instance) {
+            S3.instance = new S3();
+        }
+
+        return S3.instance;
     }
 
     private checkBucket = async () => {

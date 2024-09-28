@@ -42,7 +42,7 @@ export default function RunView({ teamId, run, isAdmin }: Readonly<RunsProps>) {
                 <h2 className="text-lg font-semibold">Run #{run.numericId}</h2>
                 <div className="flex flex-row justify-between p-2">
                     {run.reportUrl && (
-                        <Link href={run.reportUrl}>
+                        <Link href={run.reportUrl} target="_blank">
                             <Button>Open Report</Button>
                         </Link>
                     )}
@@ -73,10 +73,7 @@ export default function RunView({ teamId, run, isAdmin }: Readonly<RunsProps>) {
                 </div>
             </div>
             {run.reportUrl && (
-                <Accordion
-                    className="mt-5 bg-primary-100"
-                    variant="bordered"
-                >
+                <Accordion className="mt-5 bg-primary-100" variant="bordered">
                     <AccordionItem
                         key="1"
                         aria-label="Report Preview"

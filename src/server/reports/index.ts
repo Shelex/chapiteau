@@ -1,7 +1,7 @@
 import { env } from "~/env";
 
-import { fsPersist } from "./fs";
-import { MinioPersist } from "./minio";
+import { fsStorage } from "./fs";
+import { S3 } from "./minio";
 
 interface ReportHandler {
     write: (
@@ -21,5 +21,5 @@ interface ReportHandler {
 }
 
 export const reportHandler = (
-    env.REPORT_PERSIST === "fs" ? fsPersist : new MinioPersist()
+    env.REPORT_STORAGE === "s3" ? S3.getInstance() : fsStorage
 ) satisfies ReportHandler;
